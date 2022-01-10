@@ -7,5 +7,5 @@ class User < ApplicationRecord
   has_many :assessments
   has_many :answers
 
-  
+  has_many :team_members
 end
