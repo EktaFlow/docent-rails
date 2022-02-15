@@ -1,0 +1,2 @@
+class MrThreadsController < ApplicationController
+end

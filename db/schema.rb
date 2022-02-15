@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_10_163229) do
+ActiveRecord::Schema.define(version: 2022_02_15_220239) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -58,25 +58,37 @@ ActiveRecord::Schema.define(version: 2022_01_10_163229) do
     t.string "threads", default: [], array: true
   end
 
-  create_table "questions", force: :cascade do |t|
-    t.string "question_text"
-    t.string "question_id"
-    t.string "current_answer"
-    t.boolean "skipped"
-    t.string "thread_name"
-    t.string "subthread_name"
+  create_table "mr_threads", force: :cascade do |t|
+    t.string "name"
     t.integer "mr_level"
-    t.string "help_text"
-    t.string "criteria_text"
-    t.boolean "answered"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "assessment_id"
   end
 
+  create_table "questions", force: :cascade do |t|
+    t.string "question_text"
+    t.string "current_answer"
+    t.boolean "skipped"
+    t.string "help_text"
+    t.string "criteria_text"
+    t.boolean "answered"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "subthread_id"
+  end
+
+  create_table "subthreads", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "mr_thread_id"
+  end
+
   create_table "team_members", id: false, force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "assessment_id", null: false
+    t.string "role"
   end
 
   create_table "users", force: :cascade do |t|
@@ -100,5 +112,7 @@ ActiveRecord::Schema.define(version: 2022_01_10_163229) do
   add_foreign_key "answers", "questions"
   add_foreign_key "answers", "users"
   add_foreign_key "assessments", "users", column: "owner_id"
-  add_foreign_key "questions", "assessments"
+  add_foreign_key "mr_threads", "assessments"
+  add_foreign_key "questions", "subthreads"
+  add_foreign_key "subthreads", "mr_threads"
 end
