@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :mr_threads
+  resources :subthreads
   devise_for :users
   resources :answers
   resources :questions

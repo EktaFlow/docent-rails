@@ -75,3 +75,4 @@ group :test do
 end
 
 gem "roo", "~> 2.8.0"
+gem 'rack-cors'

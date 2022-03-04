@@ -1,5 +1,5 @@
 class Question < ApplicationRecord
-  has_many :answers
+  has_many :answers, dependent: :destroy
   belongs_to :subthread
 
   def get_question_info
@@ -14,6 +14,6 @@ class Question < ApplicationRecord
     #files for question
 
     #current thread / all threads
-  
+
   end
 end

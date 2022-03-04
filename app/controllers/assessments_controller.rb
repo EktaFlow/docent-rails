@@ -2,7 +2,7 @@ class AssessmentsController < ApplicationController
   def index
     #get all assessments for current_user both shared and owned
     #do we need to separately grab the team members for each of these?
-    @assessments = Assessments.where(owner_id: current_user.id)
+    @assessments = Assessment.where(owner_id: current_user.id)
     assessments_with_info = []
 
     #get team members & questions answered info
@@ -11,11 +11,11 @@ class AssessmentsController < ApplicationController
     end
 
     #get shared assessments & assessment info
-    tms = TeamMember.where(user_id: current_user.id)
-    tms.each do |t|
-      assessment = Assessment.find_by(assessment_id: t.assessment.id)
-      assessments_with_info << assessment.get_info_for_dashboard
-    end
+    # tms = TeamMember.where(user_id: current_user.id)
+    # tms.each do |t|
+    #   assessment = Assessment.find_by(assessment_id: t.assessment.id)
+    #   assessments_with_info << assessment.get_info_for_dashboard
+    # end
 
     render json: {assessments: assessments_with_info}
   end
@@ -33,7 +33,7 @@ class AssessmentsController < ApplicationController
       #list of threads
       #list of subthreads
       #answers array
-      #files for question 
+      #files for question
     else
       render json: {error: 'No assessment found'}
     end
@@ -43,7 +43,7 @@ class AssessmentsController < ApplicationController
     @assessment = Assessment.new(assessment_params)
     @assessment.current_mrl = params[:target_mrl]
     if @assessment.save?
-      @schema = get_schema(params[:schema_file], params[:threads])
+      @schema = get_schema(@assessment)
       add_team_members(params[:team_members], @assessment)
       render json: {assessment: @assessment.get_info_for_dashboard}
     else

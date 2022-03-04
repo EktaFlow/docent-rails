@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_02_15_220239) do
+ActiveRecord::Schema.define(version: 2022_03_01_032110) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -70,8 +70,6 @@ ActiveRecord::Schema.define(version: 2022_02_15_220239) do
     t.string "question_text"
     t.string "current_answer"
     t.boolean "skipped"
-    t.string "help_text"
-    t.string "criteria_text"
     t.boolean "answered"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
@@ -83,6 +81,8 @@ ActiveRecord::Schema.define(version: 2022_02_15_220239) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "mr_thread_id"
+    t.string "help_text"
+    t.string "criteria_text"
   end
 
   create_table "team_members", id: false, force: :cascade do |t|

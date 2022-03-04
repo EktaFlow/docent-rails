@@ -1,58 +1,85 @@
 module AssessmentsHelper
-  require 'pry'
   require 'roo'
-  def get_schema(schema_file, threads, created_assessment)
-    require 'json'
-    # binding.pry
-    # file = File.read("./app/assets/json/#{schema_file}.json")
+  def get_schema(created_assessment)
     xlsx = Roo::Spreadsheet.open('./app/assets/xls/2020_deskbook.xlsm')
-    xlsx.sheets
-    # data_hash = JSON.parse(file)
 
-    #sample threads array = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
-    # puts data_hash
+    guide = xlsx.sheet("Guide").parse()
+    db = xlsx.sheet("Database")
+    reftext = db.column(1)
+    letters = ['C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
 
-    #threads array is which threads to include
+    last_thread = nil
 
+    # guide.last_row
+    (5..guide.length - 1).each do |i|
+      #all rows past header rows, cycle through
+      current_row = guide[i]
+      puts current_row
+        #need to create 10 thread objects for each level of this thread
+        (1..10).each do |count|
+          #if thread is not already saved, do this cycle
+          if current_row[0] != nil
+            #create thread object
+            thread = MrThread.create(name: current_row[0], mr_level: count, assessment_id: created_assessment.id)
+            #saving for reference when thread name is nil, will just grab current thread
+            last_thread = thread.id
+            #create subthread for this row
+            subthread = Subthread.create(name: current_row[1], mr_thread_id: thread.id)
+            #set criteria text for the subthread
+            #check if text in box and not text in popover is sufficient for critieria text
+            subthread.criteria_text = current_row[count + 1]
+            #get string of reference text to search in the Database sheet
+            str = '$' + letters[count - 1] + '$' + i.to_s
+            #get index of that row
+            index = reftext.find_index(str)
+            if index
+              #get that ref text row
+              ref_row = db.row(index+1)
+              #get the help text for that subthread
+              subthread.help_text = ref_row[3]
+            end
+            subthread.save
+          else
+            #need to create 10 thread objects for each level of this thread
+            #first column of this row is nil (still part of previous thread) so we just set the subthread to the last thread id
+            #create subthread for this row
+            subthread = Subthread.create(name: current_row[1], mr_thread_id: last_thread)
+            #set criteria text for the subthread
+            subthread.criteria_text = current_row[count + 1]
+            #get string of reference text to search in the Database sheet
+            str = '$' + letters[count - 1] + '$' + i.to_s
+            #get index of that row
+            index = reftext.find_index(str)
+            if index
+              #get that ref text row
+              ref_row = db.row(index+1)
+              #get the help text for that subthread
+              subthread.help_text = ref_row[3]
+            end
+            subthread.save
+          end
+        end
+    end
 
-    # threads.each do |th|
-    #
-    #   #grab current thread from data hash
-    #   thread = data_hash[th - 1]
-    #   # @thread = Thread.create({
-    #   #   name: thread["threadName"],
-    #   #   assessment: created_assessment,
-    #   # })
-    #   # assessment.threads << thread["threadName"]
-    #   #run through subthreads of current thread
-    #   thread["subThreads"].each do |subthread|
-    #     #run through all mrls in  each subthread
-    #     subthread["subThreadLevels"].each do |level|
-    #       # @thread.update(mr_level: level["level"])
-    #       # @thread.subthreads.create({
-    #       #
-    #       #   })
-    #       #run through all questions in each mrl (in each subthread)
-    #       level["questions"].each do |q|
-    #         @question = Question.create(
-    #           thread_id: thread["threadId"],
-    #           thread_name: thread["threadName"],
-    #           question_text: q["questionText"],
-    #           question_id: q["questionId"],
-    #           subthread_name: subthread["name"],
-    #           subthread_id: subthread["subThreadId"],
-    #           mr_level: level["level"],
-    #           help_text: level["helpText"],
-    #           criteria_text: level["criteriaText"],
-    #           answered: false,
-    #           assessment: assessment
-    #         )
-    #
-    #       end
-    #     end
-    #   end
-    # end
-    # assessment.save
+    @all_questions = set_questions(created_assessment)
+    return @all_questions
+  end
+
+  def set_questions(assessment)
+    xlsx = Roo::Spreadsheet.open('./app/assets/xls/2020_deskbook.xlsm')
+    q_aire = xlsx.sheet("Questionnaire").parse(headers: true)
+
+    assessment.mr_threads.each do |th|
+      #get all threads
+      #get all subthreads
+      #making sure we're grabbing the right questions based on mrl
+      th.subthreads.each do |sth|
+        matching = q_aire.select {|item| item["Sub"] == sth.name && item["MRL"] == th.mr_level}
+        matching.each do |q|
+          @question = Question.create(question_text: q["Question"], subthread: sth)
+        end
+      end
+    end
   end
 
   def add_team_members(team_members, assessment)

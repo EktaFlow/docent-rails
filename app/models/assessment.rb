@@ -1,9 +1,9 @@
 class Assessment < ApplicationRecord
-  belongs_to :user
+  belongs_to :owner, class_name: 'User'
   # has_many :questions
-  has_many :mr_threads
+  has_many :mr_threads, dependent: :destroy
 
-  has_many :team_members
+  has_many :team_members, dependent: :destroy
   has_many :users, through: :team_members
 
   def get_info_for_dashboard
