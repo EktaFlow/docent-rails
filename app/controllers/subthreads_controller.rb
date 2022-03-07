@@ -1,0 +1,2 @@
+class SubthreadsController < ApplicationController
+end
