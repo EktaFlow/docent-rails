@@ -23,17 +23,8 @@ class AssessmentsController < ApplicationController
   def show
     @assessment = Assessment.find(params[:assessment_id])
     if @assessment
-      #what do we need for assessments to work?
-      #assessment information
-      #first question of assessment
-      #number of questions
-      #current question number
-      #current thread
-      #current subthread
-      #list of threads
-      #list of subthreads
-      #answers array
-      #files for question
+      @question = @assessment.find_current_question
+      
     else
       render json: {error: 'No assessment found'}
     end

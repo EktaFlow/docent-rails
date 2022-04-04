@@ -25,8 +25,31 @@ class Assessment < ApplicationRecord
 
   end
 
-  def get_qset
-    return self.questions.select {|q| q.mrl === self.current_mrl}
+  def list_of_threads
+    @threads = self.mr_threads.select {|th| th.mr_level == self.current_mrl}
+    @as = []
+    @threads.each do |th|
+      h = {
+        id: th.id,
+        name: th.name,
+        subthreads: []
+      }
+      th.subthreads.each do |sth|
+        s = {
+          id: sth.id,
+          name: sth.name
+        }
+        h.subthreads << s
+      end
+      @as << h
+    end
+    return @as
   end
+
+  def find_current_question
+    @all_qs = helpers.grab_length
+    @question = @all_qs.find {|q| q.answered == false}
+  end
+
 
 end

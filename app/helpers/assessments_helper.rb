@@ -99,6 +99,19 @@ module AssessmentsHelper
 
 end
 
+def grab_length(assessment)
+  cmrl = assessment.current_mrl
+  @th = assessment.mr_threads.select {|thread| thread.mr_level == cmrl}
+  questions = []
+  @th.each do |thread|
+    thread.subthreads.each do |sth|
+      sth.questions.each do |q|
+        questions << q
+      end
+    end
+  end
+  returns questions
+end
 
 # assessment.threads[0].subthreads[0].question[0]
 # @threads = Threads.where(assessment_id: id);
