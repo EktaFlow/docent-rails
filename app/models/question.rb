@@ -1,8 +1,6 @@
 class Question < ApplicationRecord
   has_many :answers, dependent: :destroy
   belongs_to :subthread
-  belongs_to :mr_thread, :through => :subthread
-  belongs_to :assessment, :through => :mr_thread
 
   def get_info
     #current question of assessment
@@ -16,8 +14,8 @@ class Question < ApplicationRecord
     #files for question
 
     #current thread / all threads
-
-    @length_of_asm = helpers.grab_length(self.assessment)
+    @assessment = self.subthread.mr_thread.assessment
+    @length_of_asm = ApplicationController.helpers.grab_length(@assessment)
     @position = @length_of_asm.find_index(self)
     q = {
       question_text: self.question_text,
@@ -26,7 +24,7 @@ class Question < ApplicationRecord
       position: @position,
       assessment_length: @length_of_asm,
       answers: self.answers,
-      structure: self.assessment.list_of_threads
+      structure: @assessment.list_of_threads
     }
   end
 end

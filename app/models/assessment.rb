@@ -14,14 +14,33 @@ class Assessment < ApplicationRecord
       @team_members << {email: User.find(tm.user_id).email, role: tm.role}
     end
 
+    @length = ApplicationController.helpers.grab_length(self)
+    @count = ApplicationController.helpers.grab_count(@length)
+
+    group = {
+      assessment: {
+        id: self.id,
+        name: self.name,
+        scope: self.scope,
+        target_mrl: self.target_mrl,
+        current_mrl: self.current_mrl,
+        level_switching: self.level_switching,
+        target: self.target,
+        location: self.location,
+        deskbook_version: self.deskbook_version,
+        created_at: self.created_at,
+        count: @count[0],
+        length: @count[1]
+      },
+      team_members: @team_members
+    }
+
+
     #eventually we will grab question completion
     #assessment.questions.select {|q| q.mrl == assessment.current_mrl}.length
     #assessment.questions.select { |q| q.answers.length != 0 }.length
 
-    return {
-      assessment: self,
-      team_members: @team_members
-    }
+    return group
 
   end
 

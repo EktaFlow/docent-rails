@@ -24,7 +24,7 @@ class AssessmentsController < ApplicationController
     @assessment = Assessment.find(params[:assessment_id])
     if @assessment
       @question = @assessment.find_current_question
-      
+      render json: {question: @question.get_info, subthread: @question.subthread, thread: @question.subthread.mr_thread}
     else
       render json: {error: 'No assessment found'}
     end
@@ -32,10 +32,13 @@ class AssessmentsController < ApplicationController
 
   def create
     @assessment = Assessment.new(assessment_params)
+    @assessment.owner = current_user
     @assessment.current_mrl = params[:target_mrl]
-    if @assessment.save?
-      @schema = get_schema(@assessment)
-      add_team_members(params[:team_members], @assessment)
+    if @assessment.save
+      @schema = helpers.get_schema(@assessment)
+      if params[:team_members]
+        helpers.add_team_members(params[:team_members], @assessment)
+      end
       render json: {assessment: @assessment.get_info_for_dashboard}
     else
       render json: {errors: @assessment.errors}, status: :unprocessable_entity
