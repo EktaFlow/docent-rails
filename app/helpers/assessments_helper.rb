@@ -97,21 +97,33 @@ module AssessmentsHelper
 
   end
 
-end
-
-def grab_length(assessment)
-  cmrl = assessment.current_mrl
-  @th = assessment.mr_threads.select {|thread| thread.mr_level == cmrl}
-  questions = []
-  @th.each do |thread|
-    thread.subthreads.each do |sth|
-      sth.questions.each do |q|
-        questions << q
+  def grab_length(assessment)
+    cmrl = assessment.current_mrl
+    @th = assessment.mr_threads.select {|thread| thread.mr_level == cmrl}
+    questions = []
+    @th.each do |thread|
+      thread.subthreads.each do |sth|
+        sth.questions.each do |q|
+          questions << q
+        end
       end
     end
+    return questions
   end
-  returns questions
+
+  def grab_count(qs)
+    cu = qs.find {|q| q.answered != nil}
+    cu_i = qs.find_index(cu)
+    if cu_i
+      cuu = (cu_i.to_i - 1)
+    else
+      cuu = 0
+    end
+    return [cuu, qs.length]
+  end
+
 end
+
 
 # assessment.threads[0].subthreads[0].question[0]
 # @threads = Threads.where(assessment_id: id);
