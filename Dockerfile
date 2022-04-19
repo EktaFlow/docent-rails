@@ -1,6 +1,7 @@
 FROM ruby:3.0.0
 
 ENV DATABASE_URL nil
+ENV STRIPE_KEY nil
 
 RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs
 RUN mkdir /app
