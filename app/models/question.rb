@@ -18,13 +18,15 @@ class Question < ApplicationRecord
     @length_of_asm = ApplicationController.helpers.grab_length(@assessment)
     @position = @length_of_asm.find_index(self)
     q = {
+      question_id: self.id,
       question_text: self.question_text,
-      current_answer: self.current_answer,
-      answered: self.answered,
-      position: @position,
-      assessment_length: @length_of_asm,
-      answers: self.answers,
-      structure: @assessment.list_of_threads
+      current_answer_text: self.current_answer,
+      answered: self.answered == nil ? false : true,
+      position: @position + 1,
+      assessment_length: @length_of_asm.length,
+      current_answer: self.answers.empty? ? [] : self.answers.last,
+      structure: @assessment.list_of_threads,
+      current_mrl: self.subthread.mr_thread.mr_level
     }
   end
 end

@@ -7,15 +7,15 @@ class AssessmentsController < ApplicationController
 
     #get team members & questions answered info
     @assessments.each do |am|
-      assessments_with_info << am.get_info_for_dashboard
+      assessments_with_info << am.get_info_for_dashboard('owned')
     end
 
     #get shared assessments & assessment info
-    # tms = TeamMember.where(user_id: current_user.id)
-    # tms.each do |t|
-    #   assessment = Assessment.find_by(assessment_id: t.assessment.id)
-    #   assessments_with_info << assessment.get_info_for_dashboard
-    # end
+    tms = TeamMember.where(user_id: current_user.id)
+    tms.each do |t|
+      assessment = Assessment.find_by(assessment_id: t.assessment.id)
+      assessments_with_info << assessment.get_info_for_dashboard('shared')
+    end
 
     render json: {assessments: assessments_with_info}
   end
@@ -24,7 +24,7 @@ class AssessmentsController < ApplicationController
     @assessment = Assessment.find(params[:assessment_id])
     if @assessment
       @question = @assessment.find_current_question
-      render json: {question: @question.get_info, subthread: @question.subthread, thread: @question.subthread.mr_thread}
+      render json: {question: @question.get_info, subthread: @question.subthread, thread: @question.subthread.mr_thread, assessment_id: @assessment.id}
     else
       render json: {error: 'No assessment found'}
     end
@@ -42,6 +42,15 @@ class AssessmentsController < ApplicationController
       render json: {assessment: @assessment.get_info_for_dashboard}
     else
       render json: {errors: @assessment.errors}, status: :unprocessable_entity
+    end
+  end
+
+  def grab_base_report
+    @assessment = Assessment.find(params[:id])
+    if @assessment
+      render json: {threads: @assessment.report_grouping, info: @assessment, team_members: @assessment.team_members}  
+    else
+      render json: {errors: @assessment.errors.full_messages}
     end
   end
 

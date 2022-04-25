@@ -1,16 +1,34 @@
 class AnswersController < ApplicationController
   def index
+    @question = Question.find(params[:question_id])
+    if @question.answers.length
+      render json: {answers: @question.answers}
+    else if @question.answers.length == 0
+      render json: {answers: []}
+    else
+      render json: {errors: @question.errors.full_messages}
+    end
   end
 
   def create
     @question = Question.find(params[:question_id])
     @answer = Answer.new(answer_params)
-    @answer.question = @question
+    @question.answers << @answer
+    @question.update(current_answer: @answer.answer)
+    @question.update(answered: true)
     if @answer.save
       render json: {answer: @answer}
     else
       render json: {errors: @assessment.errors}, status: :unprocessable_entity
     end
+  end
+
+  def revert_back
+    @question = Question.find(params[:question_id])
+    @old_answer = Answer.find(params[:answer_id])
+    #old answer should fill in all fields but change who made the edit (reverted back) and the created at timing
+    #add column to answer table called reverted bool
+    # @new_answer = Answer.create(@old_answer)
   end
 
   def show

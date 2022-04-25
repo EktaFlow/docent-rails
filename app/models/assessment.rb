@@ -6,7 +6,7 @@ class Assessment < ApplicationRecord
   has_many :team_members, dependent: :destroy
   has_many :users, through: :team_members
 
-  def get_info_for_dashboard
+  def get_info_for_dashboard(type)
     #grab team members for assessment
     @team_members = []
     self.team_members.each do |tm|
@@ -16,25 +16,46 @@ class Assessment < ApplicationRecord
 
     @length = ApplicationController.helpers.grab_length(self)
     @count = ApplicationController.helpers.grab_count(@length)
-
-    group = {
-      assessment: {
-        id: self.id,
-        name: self.name,
-        scope: self.scope,
-        target_mrl: self.target_mrl,
-        current_mrl: self.current_mrl,
-        level_switching: self.level_switching,
-        target: self.target,
-        location: self.location,
-        deskbook_version: self.deskbook_version,
-        created_at: self.created_at,
-        count: @count[0],
-        length: @count[1]
-      },
-      team_members: @team_members
-    }
-
+    group = ''
+    if type == 'owned'
+      group = {
+        assessment: {
+          id: self.id,
+          name: self.name,
+          scope: self.scope,
+          target_mrl: self.target_mrl,
+          current_mrl: self.current_mrl,
+          level_switching: self.level_switching,
+          target: self.target,
+          location: self.location,
+          deskbook_version: self.deskbook_version,
+          created_at: self.created_at,
+          count: @count[0],
+          length: @count[1],
+          shared: false
+        },
+        team_members: @team_members
+      }
+    else
+      group = {
+        assessment: {
+          id: self.id,
+          name: self.name,
+          scope: self.scope,
+          target_mrl: self.target_mrl,
+          current_mrl: self.current_mrl,
+          level_switching: self.level_switching,
+          target: self.target,
+          location: self.location,
+          deskbook_version: self.deskbook_version,
+          created_at: self.created_at,
+          count: @count[0],
+          length: @count[1],
+          shared: true
+        },
+        team_members: @team_members
+      }
+    end
 
     #eventually we will grab question completion
     #assessment.questions.select {|q| q.mrl == assessment.current_mrl}.length
@@ -48,26 +69,60 @@ class Assessment < ApplicationRecord
     @threads = self.mr_threads.select {|th| th.mr_level == self.current_mrl}
     @as = []
     @threads.each do |th|
-      h = {
+      thread = {
         id: th.id,
         name: th.name,
         subthreads: []
       }
       th.subthreads.each do |sth|
-        s = {
-          id: sth.id,
-          name: sth.name
-        }
-        h.subthreads << s
+        if sth.questions.length != 0
+          subthread = {
+            id: sth.id,
+            name: sth.name
+          }
+          thread[:subthreads] << subthread
+        end
       end
-      @as << h
+      if thread[:subthreads].length != 0
+        @as << thread
+      end
     end
     return @as
   end
 
   def find_current_question
-    @all_qs = helpers.grab_length
-    @question = @all_qs.find {|q| q.answered == false}
+    @all_qs = ApplicationController.helpers.grab_length(self)
+    @question = @all_qs.find {|q| q.answered == nil}
+  end
+
+  def report_grouping
+    @threads = self.mr_threads.select {|th| th.mr_level == self.current_mrl}
+    @as = []
+    @threads.each do |th|
+      thread = {
+        id: th.id,
+        name: th.name,
+        subthreads: []
+      }
+      th.subthreads.each do |sth|
+        subthread = {
+          id: sth.id,
+          name: sth.name,
+          questions: []
+        }
+        sth.questions.each do |q|
+          question = {
+            id: q.id,
+            question_text: q.question_text,
+            answer: answered ? q.answers.last : 'Unanswered'
+          }
+          sth.questions << question
+        end
+        h.subthreads << subthread
+      end
+      @as << threads
+    end
+    return @as
   end
 
 
