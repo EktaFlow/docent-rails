@@ -11,7 +11,7 @@ module AssessmentsHelper
     last_thread = nil
 
     # guide.last_row
-    (5..guide.length - 1).each do |i|
+    (4..guide.length - 1).each do |i|
       #all rows past header rows, cycle through
       current_row = guide[i]
       puts current_row
@@ -22,14 +22,12 @@ module AssessmentsHelper
             #create thread object
             thread = MrThread.create(name: current_row[0], mr_level: count, assessment_id: created_assessment.id)
             #saving for reference when thread name is nil, will just grab current thread
-            last_thread = thread.id
+            last_thread = thread.name[0]
             #create subthread for this row
             subthread = Subthread.create(name: current_row[1], mr_thread_id: thread.id)
-            #set criteria text for the subthread
-            #check if text in box and not text in popover is sufficient for critieria text
-            subthread.criteria_text = current_row[count + 1]
+
             #get string of reference text to search in the Database sheet
-            str = '$' + letters[count - 1] + '$' + i.to_s
+            str = '$' + letters[count - 1] + '$' + (i + 2).to_s
             #get index of that row
             index = reftext.find_index(str)
             if index
@@ -37,17 +35,23 @@ module AssessmentsHelper
               ref_row = db.row(index+1)
               #get the help text for that subthread
               subthread.help_text = ref_row[3]
+              #set criteria text for the subthread
+
+              subthread.criteria_text = ref_row[2]
             end
             subthread.save
           else
             #need to create 10 thread objects for each level of this thread
             #first column of this row is nil (still part of previous thread) so we just set the subthread to the last thread id
             #create subthread for this row
-            subthread = Subthread.create(name: current_row[1], mr_thread_id: last_thread)
+            # binding.pry
+            @ths = MrThread.where(mr_level: count)
+            @thread = @ths.select {|th| th.name[0] == last_thread}[0]
+            subthread = Subthread.create(name: current_row[1], mr_thread_id: @thread.id)
             #set criteria text for the subthread
-            subthread.criteria_text = current_row[count + 1]
+            # subthread.criteria_text = current_row[count + 1]
             #get string of reference text to search in the Database sheet
-            str = '$' + letters[count - 1] + '$' + i.to_s
+            str = '$' + letters[count - 1] + '$' + (i + 2).to_s
             #get index of that row
             index = reftext.find_index(str)
             if index
@@ -55,16 +59,19 @@ module AssessmentsHelper
               ref_row = db.row(index+1)
               #get the help text for that subthread
               subthread.help_text = ref_row[3]
+              subthread.criteria_text = ref_row[2]
             end
             subthread.save
           end
         end
     end
-
+    # return created_assessment
     @all_questions = set_questions(created_assessment)
+    puts @all_questions
     return @all_questions
   end
 
+  #looks like questions are starting in thread B and not A
   def set_questions(assessment)
     xlsx = Roo::Spreadsheet.open('./app/assets/xls/2020_deskbook.xlsm')
     q_aire = xlsx.sheet("Questionnaire").parse(headers: true)
@@ -97,6 +104,8 @@ module AssessmentsHelper
 
   end
 
+  #this returns an array that's all questions in assessment that match current mrl
+  #make sure test assessments have current_mrl filled in
   def grab_length(assessment)
     cmrl = assessment.current_mrl
     @th = assessment.mr_threads.select {|thread| thread.mr_level == cmrl}
