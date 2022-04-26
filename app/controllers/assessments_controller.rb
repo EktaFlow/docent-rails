@@ -48,7 +48,7 @@ class AssessmentsController < ApplicationController
   def grab_base_report
     @assessment = Assessment.find(params[:id])
     if @assessment
-      render json: {threads: @assessment.report_grouping, info: @assessment, team_members: @assessment.team_members}  
+      render json: {threads: @assessment.report_grouping, info: @assessment, team_members: @assessment.team_members}
     else
       render json: {errors: @assessment.errors.full_messages}
     end
@@ -56,6 +56,8 @@ class AssessmentsController < ApplicationController
 
   def destroy
   end
+
+  
 
   private
 

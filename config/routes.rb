@@ -8,6 +8,8 @@ Rails.application.routes.draw do
   resources :users
 
   get '/next_question', to: 'assessments#show'
+  get '/questions/next', to: 'questions#next'
+  get '/questions/prev', to: 'questions#prev'
 
   # get '/browse', to: 'projects#browse'
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
