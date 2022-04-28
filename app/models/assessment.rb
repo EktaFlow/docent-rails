@@ -114,13 +114,13 @@ class Assessment < ApplicationRecord
           question = {
             id: q.id,
             question_text: q.question_text,
-            answer: answered ? q.answers.last : 'Unanswered'
+            answer: q.answers.length > 0 ? q.answers.last : 'Unanswered'
           }
-          sth.questions << question
+          subthread[:questions] << question
         end
-        h.subthreads << subthread
+        thread[:subthreads] << subthread
       end
-      @as << threads
+      @as << thread
     end
     return @as
   end
