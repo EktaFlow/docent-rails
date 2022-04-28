@@ -3,7 +3,7 @@ class AnswersController < ApplicationController
     @question = Question.find(params[:question_id])
     if @question.answers.length
       render json: {answers: @question.answers}
-    else if @question.answers.length == 0
+    elsif @question.answers.length == 0
       render json: {answers: []}
     else
       render json: {errors: @question.errors.full_messages}
@@ -23,16 +23,17 @@ class AnswersController < ApplicationController
     end
   end
 
-  def revert_back
-    @question = Question.find(params[:question_id])
-    @old_answer = Answer.find(params[:answer_id])
-    #old answer should fill in all fields but change who made the edit (reverted back) and the created at timing
-    #add column to answer table called reverted bool
-    # @new_answer = Answer.create(@old_answer)
-  end
+  # def revert_back
+  #   @question = Question.find(params[:question_id])
+  #   @old_answer = Answer.find(params[:answer_id])
+  #   #old answer should fill in all fields but change who made the edit (reverted back) and the created at timing
+  #   #add column to answer table called reverted bool
+  #   # @new_answer = Answer.create(@old_answer)
+  # end
 
-  def show
-  end
+  # def show
+  #
+  # end
 
   private
 

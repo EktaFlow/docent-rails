@@ -1,0 +1,6 @@
+<div>
+  <h2>Hi <%= @user.name %></h2>
+  <p>You have been added to the assessment <%= @assessment.name%></p>
+  <p>You can access the assessment through the Docent Dashboard or through the link provided below.</p>
+  <p><a href=<%= 'https://web.mfgdocent.com/questions/' + @assessment.id.to_s %>>Assessment Link</a></p>
+</div>
