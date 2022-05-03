@@ -2,7 +2,13 @@ class QuestionsController < ApplicationController
   def index
   end
 
-  #next from questions (either previous)
+  #when navigating from a report
+  def show
+    @question = Question.find(params[:id])
+    render json: {question: @question.get_info, subthread: @question.subthread, thread: @question.subthread.mr_thread, level_change: 'none'}
+  end
+
+  #next/previous from questions from questions page
   def action
     @current_question = Question.find(params[:question_id])
     @assessment = Assessment.find(params[:assessment_id])
@@ -23,7 +29,7 @@ class QuestionsController < ApplicationController
     end
 
 
-    #end of assessment
+    #end of assessment do not return question - 'next' button shouldnt be available anyway
     if @cq_index + 1 == @questions.length -1 || @cq_index == 0
       render json: {end_of_assessment: true, dropped_level: false}
     end
@@ -32,6 +38,7 @@ class QuestionsController < ApplicationController
     @level_change = 'none'
 
     #no level switching - normal action (even switching between subthreads)
+    #for this level, need to check if next subthread has been failed or not before navigating to question
     if @assessment.level_switching == false
       @next_question = @questions[@act]
 
