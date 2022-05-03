@@ -34,6 +34,9 @@ class AssessmentsController < ApplicationController
     @assessment = Assessment.new(assessment_params)
     @assessment.owner = current_user
     @assessment.current_mrl = params[:target_mrl]
+    if params[:assessment][:level_switching] == nil
+      @assessment.level_switching = false
+    end
     if @assessment.save
       @schema = helpers.get_schema(@assessment)
       if params[:team_members]
@@ -57,7 +60,7 @@ class AssessmentsController < ApplicationController
   def destroy
   end
 
-  
+
 
   private
 

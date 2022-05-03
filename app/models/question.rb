@@ -15,7 +15,7 @@ class Question < ApplicationRecord
 
     #current thread / all threads
     @assessment = self.subthread.mr_thread.assessment
-    @length_of_asm = ApplicationController.helpers.grab_length(@assessment)
+    @length_of_asm = @assessment.grab_length
     @position = @length_of_asm.find_index(self)
     q = {
       question_id: self.id,
