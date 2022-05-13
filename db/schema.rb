@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_03_01_032110) do
+ActiveRecord::Schema.define(version: 2022_05_13_143647) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -56,6 +56,20 @@ ActiveRecord::Schema.define(version: 2022_03_01_032110) do
     t.datetime "updated_at", precision: 6, null: false
     t.integer "owner_id"
     t.string "threads", default: [], array: true
+  end
+
+  create_table "file_attachment_answers", force: :cascade do |t|
+    t.integer "file_attachment_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "question_id"
+  end
+
+  create_table "file_attachments", force: :cascade do |t|
+    t.integer "assessment_id"
+    t.string "file_name"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "mr_threads", force: :cascade do |t|
@@ -112,6 +126,9 @@ ActiveRecord::Schema.define(version: 2022_03_01_032110) do
   add_foreign_key "answers", "questions"
   add_foreign_key "answers", "users"
   add_foreign_key "assessments", "users", column: "owner_id"
+  add_foreign_key "file_attachment_answers", "file_attachments"
+  add_foreign_key "file_attachment_answers", "questions"
+  add_foreign_key "file_attachments", "assessments"
   add_foreign_key "mr_threads", "assessments"
   add_foreign_key "questions", "subthreads"
   add_foreign_key "subthreads", "mr_threads"
