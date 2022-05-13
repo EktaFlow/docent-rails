@@ -95,6 +95,28 @@ class Assessment < ApplicationRecord
     @question = @all_qs.find {|q| q.answered == nil}
   end
 
+  def get_files_for_explorer
+    @files = []
+    if self.file_attachments.length > 0
+      self.file_attachments.each do |fa|
+        f = {
+          url: fa.outside_file.attachment ? fa.outside_file.attachment.blob.url : nil,
+          name: fa.file_name,
+          questions: []
+        }
+        if fa.questions.length
+          fa.questions.each do |question|
+            q = {
+              id: question.id,
+              question_num: question.grab_location
+            }
+            f[:questions] << q
+          end
+        end
+      end
+    end
+  end
+
   def report_grouping
     @threads = self.mr_threads.select {|th| th.mr_level == self.current_mrl}
     @as = []
