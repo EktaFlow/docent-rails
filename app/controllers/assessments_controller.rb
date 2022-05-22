@@ -42,7 +42,7 @@ class AssessmentsController < ApplicationController
       if params[:team_members]
         helpers.add_team_members(params[:team_members], @assessment)
       end
-      render json: {assessment: @assessment.get_info_for_dashboard}
+      render json: {assessment_id: @assessment.id}
     else
       render json: {errors: @assessment.errors}, status: :unprocessable_entity
     end
@@ -58,7 +58,11 @@ class AssessmentsController < ApplicationController
   end
 
   def destroy
+    @assessment = Assessment.find(params[:id])
+    @assessment.destroy
+    render json: {success: true}
   end
+
 
 
 
