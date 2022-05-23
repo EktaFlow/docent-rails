@@ -24,7 +24,7 @@ class AssessmentsController < ApplicationController
     @assessment = Assessment.find(params[:assessment_id])
     if @assessment
       @question = @assessment.find_current_question
-      render json: {question: @question.get_info, subthread: @question.subthread, thread: @question.subthread.mr_thread, assessment_id: @assessment.id}
+      render json: @question.all_info('none')
     else
       render json: {error: 'No assessment found'}
     end

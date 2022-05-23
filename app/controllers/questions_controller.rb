@@ -9,7 +9,7 @@ class QuestionsController < ApplicationController
   end
 
   #next/previous from questions from questions page
-  def action
+  def pick_action
     @current_question = Question.find(params[:question_id])
     @assessment = Assessment.find(params[:assessment_id])
     @questions = @assessment.grab_length
@@ -18,54 +18,94 @@ class QuestionsController < ApplicationController
     subthread = @current_question.subthread
     #for when question/subthread has been dropped
     position_in_subthread = subthread.questions.find_index(@current_question)
-    @act = nil
-    @pis = nil
-    if params[:action] == 'next'
+    @act = -1
+    @pis = -1
+    if params[:movement] == 'next'
       @act = @cq_index + 1
       @pis = position_in_subthread + 1
-    elsif params[:action] == 'prev'
+    elsif params[:movement] == 'prev'
       @act = @cq_index - 1
       @pis = position_in_subthread - 1
     end
 
 
     #end of assessment do not return question - 'next' button shouldnt be available anyway
-    if @cq_index + 1 == @questions.length -1 || @cq_index == 0
-      render json: {end_of_assessment: true, dropped_level: false}
-    end
+    # if (@cq_index + 1) == (@questions.length - 1) || @cq_index == 0
+    #   render json: {end_of_assessment: true, dropped_level: false}
+    # end
 
-    @next_question = nil
+    #base level setting to next question in array
+    @next_question = @questions[@act]
+    #for the response to see if a toast is needed
     @level_change = 'none'
 
     #no level switching - normal action (even switching between subthreads)
     #for this level, need to check if next subthread has been failed or not before navigating to question
     if @assessment.level_switching == false
+      #next question in normal array
       @next_question = @questions[@act]
 
-    #level switching on, but not at end of subthread
-    elsif @assessment.level_switching == true && (if position_in_subthread != subthread.questions.length - 1 || position_in_subthread != 0)
+    #level switching on, but not at end/beginning of subthread
+    elsif @assessment.level_switching == true && (position_in_subthread != subthread.questions.length - 1 && position_in_subthread != 0)
+      #subthread could possibly be at another level
       @next_question = subthread.questions[@pis]
 
     #level switching on and at end of subthread
     elsif @assessment.level_switching == true && position_in_subthread == subthread.questions.length - 1
+      #this set of items should only happen if action is next
+
+      if params[:movement] == 'next'
       #if subthread has failed
-      if params[:failed_subthread] == true
-        @assessment.update(current_mrl: @assessment.target_mrl - params[:dropped])
-        @next_question = @assessment.switch_level(@current_question)
-        @level_change = 'down'
-      #if subthread has passed
+        if subthread.status == 'failed'
+          puts 'in failed'
+          #update assessment to move down a level for this subthread
+          @assessment.update(current_mrl: @assessment.current_mrl - 1)
+          #grabbing the next question by dropping down a subthread
+          @next_question = @assessment.switch_level(@current_question, 'forward')
+          #updating message for toast on fe
+          @level_change = 'down'
+        #if subthread has passed
+        elsif subthread.status == 'passed'
+          puts 'in passed'
+          #adjusting current_mrl back to target_mrl
+          if @assessment.current_mrl != @assessment.target_mrl
+            @assessment.update(current_mrl: @assessment.target_mrl)
+            #grabbing the next subthread
+            @next_question = @assessment.switch_level(@current_question, 'forward')
+            #updating message for toast
+            @level_change = 'up'
+          else
+            @next_question = @questions[@act]
+          end
+        else
+          @next_question = @questions[@act]
+        end
       else
-        @assessment.update(current_mrl: @assessment.target_mrl)
-        @next_question = @assessment.next_subthread_after_ls(@current_question, params[:action])
-        @level_change = 'up'
+        #if action was previous, not done with the subthread so just move back one position
+        @next_question = subthread.questions[@pis]
       end
+
+    #at the first question of subthread
     elsif @assessment.level_switching == true && position_in_subthread == 0
-      @assessment.update(current_mrl: @assessment.target_mrl)
-      @next_question = @assessment.next_subthread_after_ls(@current_question, params[:action])
-      @level_change = 'up'
+      #this set of items should only happen if action is prev
+      if params[:movement] == 'prev'
+        #switching back to target mrl, because level switching only applies to current subthread
+        if @assessment.target_mrl != @assessment.current_mrl
+          @assessment.update(current_mrl: @assessment.target_mrl)
+          #grabbing the previous subthread
+          @next_question = @assessment.switch_level(@current_question, 'backwards')
+          #message for toast
+          @level_change = 'up'
+        else
+          @next_question = @questions[@act]
+        end
+      else
+        #at the start of the subthread moving forward, even w level switching on, no changes to subthread level should occur
+        @next_question = subthread.questions[@pis]
+      end
     end
 
-    render json: {question: @next_quesiton.get_info, subthread: @next_question.subthread, thread: @next_question.subthread.mr_thread, level_change: @level_change}
+    #rendering all information
+    render json: @next_question.all_info(@level_change)
   end
-
 end

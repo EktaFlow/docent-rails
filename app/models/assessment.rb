@@ -92,7 +92,7 @@ class Assessment < ApplicationRecord
 
   def find_current_question
     @all_qs = self.grab_length
-    @question = @all_qs.find {|q| q.answered == nil}
+    @question = @all_qs.find {|q| q.answered == nil || q.answered == false}
   end
 
   def report_grouping
@@ -125,21 +125,35 @@ class Assessment < ApplicationRecord
     return @as
   end
 
-  def switch_level(cq)
+  def switch_level(cq, movement)
+    #finding the right question to switch to
     thread_start = cq.subthread.mr_thread.name[0]
     ths = MrThread.where(mr_level: self.current_mrl)
     th = ths.select {|th| th.name[0] == thread_start}[0]
-    subthread_start = cq.subthread.name[0..2]
-    sth = th.subthreads.select {|st| st.name[0..2] == subthread_start}
-    if sth
-      self.update(dropped_subthread_id: sth.id)
-      return sth.questions[0]
+
+    if movement == 'forward'
+        # self.update(dropped_subthread_id: sth.id)
+        subthread_start = cq.subthread.name[0..2]
+        subs = th.subthreads.select { |sth| sth.questions.length > 0 }
+        sth = subs.select {|st| st.name[0..2] == subthread_start}[0]
+        if sth
+          # binding.pry
+          return sth.questions[0]
+        end
+    elsif movement == 'backwards'
+      # binding.pry
+      if th.subthreads.first != sth
+        index = ths.find_index(th)
+        if index != 0
+          @new_th = ths[index - 1]
+          # binding.pry
+          subs = @new_th.subthreads.select { |sth| sth.questions.length > 0 }
+          return subs.last.questions.last
+        end
+      end
     end
   end
 
-  def next_subthread_after_ls(cq)
-    @questions = self.grab_length
-  end
 
   #this returns an array that's all questions in assessment that match current mrl
   #make sure test assessments have current_mrl filled in

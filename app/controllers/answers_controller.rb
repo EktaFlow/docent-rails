@@ -12,10 +12,17 @@ class AnswersController < ApplicationController
 
   def create
     @question = Question.find(params[:question_id])
-    @answer = Answer.new(answer_params)
+    @answer = Answer.create(answer_params)
     @question.answers << @answer
     @question.update(current_answer: @answer.answer)
     @question.update(answered: true)
+    if @question == @question.subthread.questions.last
+      if @answer.answer == 'yes'
+        @question.subthread.update(status: 'passed')
+      elsif @answer.answer == 'no'
+        @question.subthread.update(status: 'failed')
+      end
+    end
     if @answer.save
       render json: {answer: @answer}
     else
