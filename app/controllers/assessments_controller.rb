@@ -23,7 +23,7 @@ class AssessmentsController < ApplicationController
   def show
     @assessment = Assessment.find(params[:assessment_id])
     if @assessment
-      @question = @assessment.find_current_question
+      @question = @assessment.find_current_3question
       render json: {question: @question.get_info, subthread: @question.subthread, thread: @question.subthread.mr_thread, assessment_id: @assessment.id}
     else
       render json: {error: 'No assessment found'}

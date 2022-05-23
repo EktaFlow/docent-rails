@@ -14,6 +14,7 @@ Rails.application.routes.draw do
 
   get '/get_files', to: 'assessments#file_explorer'
   post '/add_to_question', to: 'file_attachments#add_to_question'
+  get '/get_assessment', to: 'assessments#grab_base_report'
 
   # get '/browse', to: 'projects#browse'
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
