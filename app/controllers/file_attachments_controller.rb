@@ -6,14 +6,15 @@ class FileAttachmentsController < ApplicationController
     @c_question = Question.find(params[:question_id])
     @file_attachment = FileAttachment.create(assessment: @assessment, file_name: params[:file_name])
     if @file_attachment.save
-      @file_attachment.outside_file.attach(params[:file_obj])
+      @file_attachment.outside_file.attach(params[:outside_file])
       @faa = FileAttachmentAnswer.create(file_attachment: @file_attachment, question: @c_question)
+      puts @faa
+      puts @file_attachment
       render json: {file: @file_attachment, question: @c_question}
     else
       render json: {errors: @file_attachment.errors.full_messages}
     end
   end
-
 
   #this needs file id, question id
   #should be an axios.post() call
@@ -30,5 +31,9 @@ class FileAttachmentsController < ApplicationController
     else
       render json: {errors: 'File Not Found'}
     end
+  end
+
+  def file_attachment_params
+    params.require(:file_attachment).permit(:assessment_id, :question_id, :file_name, :outside_file)
   end
 end

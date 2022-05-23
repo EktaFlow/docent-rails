@@ -2,6 +2,7 @@ class Assessment < ApplicationRecord
   belongs_to :owner, class_name: 'User'
   # has_many :questions
   has_many :mr_threads, dependent: :destroy
+  has_many :file_attachments, dependent: :destroy
 
   has_many :team_members, dependent: :destroy
   has_many :users, through: :team_members
@@ -102,6 +103,7 @@ class Assessment < ApplicationRecord
         f = {
           url: fa.outside_file.attachment ? fa.outside_file.attachment.blob.url : nil,
           name: fa.file_name,
+          created_at: fa.created_at,
           questions: []
         }
         if fa.questions.length
@@ -113,8 +115,10 @@ class Assessment < ApplicationRecord
             f[:questions] << q
           end
         end
+        @files << f
       end
     end
+    return @files
   end
 
   def report_grouping

@@ -77,3 +77,5 @@ end
 
 gem "roo", "~> 2.8.0"
 gem 'rack-cors'
+
+gem 'active_model_serializers'
