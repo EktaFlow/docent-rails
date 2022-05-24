@@ -74,10 +74,6 @@ class AssessmentsController < ApplicationController
   end
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> a95e8b9a241398109f0a5d801f04a10a75259145
 
   private
 
