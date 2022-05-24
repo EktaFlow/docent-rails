@@ -1,6 +1,8 @@
 class Question < ApplicationRecord
   has_many :answers, dependent: :destroy
   belongs_to :subthread
+  has_many :file_attachment_answers
+  has_many :file_attachments, through: :file_attachment_answers
 
   def get_info
     #current question of assessment
@@ -26,8 +28,26 @@ class Question < ApplicationRecord
       assessment_length: @length_of_asm.length,
       current_answer: self.answers.empty? ? [] : self.answers.last,
       structure: @assessment.list_of_threads,
-      current_mrl: self.subthread.mr_thread.mr_level
+      current_mrl: self.subthread.mr_thread.mr_level,
+      files: []
     }
+    if self.file_attachments.length
+      self.file_attachments.each do |fa|
+        var ff = {
+          url: fa.outside_file.attachment ? fa.outside_file.attachment.blob.url : nil,
+          name: fa.file_name,
+        }
+        q[:files] << ff
+      end
+    end
+    return q
+  end
+
+  def grab_location
+    st = self.subthread
+    index = st.questions.find_index(self) + 1
+    str = st.name[0..2] + ' Q#' + index.to_s
+    return str
   end
 
   def all_info(lc)

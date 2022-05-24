@@ -11,9 +11,9 @@ module AssessmentsHelper
     last_thread = nil
 
     # guide.last_row
-    (4..guide.length - 1).each do |i|
+    (4..guide.length - 1).each do |count|
       #all rows past header rows, cycle through
-      current_row = guide[i]
+      current_row = guide[count]
       puts current_row
         #need to create 10 thread objects for each level of this thread
         (1..10).each do |count|

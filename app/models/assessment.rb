@@ -2,6 +2,7 @@ class Assessment < ApplicationRecord
   belongs_to :owner, class_name: 'User'
   # has_many :questions
   has_many :mr_threads, dependent: :destroy
+  has_many :file_attachments, dependent: :destroy
 
   has_many :team_members, dependent: :destroy
   has_many :users, through: :team_members
@@ -93,6 +94,31 @@ class Assessment < ApplicationRecord
   def find_current_question
     @all_qs = self.grab_length
     @question = @all_qs.find {|q| q.answered == nil || q.answered == false}
+  end
+
+  def get_files_for_explorer
+    @files = []
+    if self.file_attachments.length > 0
+      self.file_attachments.each do |fa|
+        f = {
+          url: fa.outside_file.attachment ? fa.outside_file.attachment.blob.url : nil,
+          name: fa.file_name,
+          created_at: fa.created_at,
+          questions: []
+        }
+        if fa.questions.length
+          fa.questions.each do |question|
+            q = {
+              id: question.id,
+              question_num: question.grab_location
+            }
+            f[:questions] << q
+          end
+        end
+        @files << f
+      end
+    end
+    return @files
   end
 
   def report_grouping

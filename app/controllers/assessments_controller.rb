@@ -57,6 +57,16 @@ class AssessmentsController < ApplicationController
     end
   end
 
+  #get_files
+  def file_explorer
+    @assessment = Assessment.find(params[:id])
+    if @assessment
+      render json: {files: @assessment.get_files_for_explorer}
+    else
+      render json: {errors: @assessment.errors.full_messages}
+    end
+  end
+
   def destroy
     @assessment = Assessment.find(params[:id])
     @assessment.destroy
@@ -64,7 +74,10 @@ class AssessmentsController < ApplicationController
   end
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> a95e8b9a241398109f0a5d801f04a10a75259145
 
   private
 

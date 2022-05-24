@@ -15,16 +15,20 @@ class QuestionsController < ApplicationController
     @questions = @assessment.grab_length
     #for non dropped subthreads
     @cq_index = @questions.find_index(@current_question)
-    subthread = @current_question.subthread
     #for when question/subthread has been dropped
+    subthread = @current_question.subthread
     position_in_subthread = subthread.questions.find_index(@current_question)
     @act = -1
     @pis = -1
     if params[:movement] == 'next'
+      #non dropped subthreads
       @act = @cq_index + 1
+      #dropped subthreads
       @pis = position_in_subthread + 1
     elsif params[:movement] == 'prev'
+      #non dropped subthreads
       @act = @cq_index - 1
+      #dropped subthreads
       @pis = position_in_subthread - 1
     end
 
