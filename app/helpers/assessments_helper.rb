@@ -104,32 +104,9 @@ module AssessmentsHelper
 
   end
 
-  #this returns an array that's all questions in assessment that match current mrl
-  #make sure test assessments have current_mrl filled in
-  def grab_length(assessment)
-    cmrl = assessment.current_mrl
-    @th = assessment.mr_threads.select {|thread| thread.mr_level == cmrl}
-    questions = []
-    @th.each do |thread|
-      thread.subthreads.each do |sth|
-        sth.questions.each do |q|
-          questions << q
-        end
-      end
-    end
-    return questions
-  end
 
-  def grab_count(qs)
-    cu = qs.find {|q| q.answered != nil}
-    cu_i = qs.find_index(cu)
-    if cu_i
-      cuu = (cu_i.to_i - 1)
-    else
-      cuu = 0
-    end
-    return [cuu, qs.length]
-  end
+
+  
 
 end
 

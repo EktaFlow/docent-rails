@@ -23,8 +23,8 @@ class AssessmentsController < ApplicationController
   def show
     @assessment = Assessment.find(params[:assessment_id])
     if @assessment
-      @question = @assessment.find_current_3question
-      render json: {question: @question.get_info, subthread: @question.subthread, thread: @question.subthread.mr_thread, assessment_id: @assessment.id}
+      @question = @assessment.find_current_question
+      render json: @question.all_info('none')
     else
       render json: {error: 'No assessment found'}
     end
@@ -34,12 +34,15 @@ class AssessmentsController < ApplicationController
     @assessment = Assessment.new(assessment_params)
     @assessment.owner = current_user
     @assessment.current_mrl = params[:target_mrl]
+    if params[:assessment][:level_switching] == nil
+      @assessment.level_switching = false
+    end
     if @assessment.save
       @schema = helpers.get_schema(@assessment)
       if params[:team_members]
         helpers.add_team_members(params[:team_members], @assessment)
       end
-      render json: {assessment: @assessment.get_info_for_dashboard}
+      render json: {assessment_id: @assessment.id}
     else
       render json: {errors: @assessment.errors}, status: :unprocessable_entity
     end
@@ -54,7 +57,7 @@ class AssessmentsController < ApplicationController
     end
   end
 
-  #get_files 
+  #get_files
   def file_explorer
     @assessment = Assessment.find(params[:id])
     if @assessment
@@ -65,6 +68,9 @@ class AssessmentsController < ApplicationController
   end
 
   def destroy
+    @assessment = Assessment.find(params[:id])
+    @assessment.destroy
+    render json: {success: true}
   end
 
 

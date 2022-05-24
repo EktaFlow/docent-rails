@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_05_18_181507) do
+ActiveRecord::Schema.define(version: 2022_05_23_151917) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -106,7 +106,6 @@ ActiveRecord::Schema.define(version: 2022_05_18_181507) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "assessment_id"
-    t.integer "owner_id"
   end
 
   create_table "questions", force: :cascade do |t|
@@ -126,7 +125,7 @@ ActiveRecord::Schema.define(version: 2022_05_18_181507) do
     t.integer "mr_thread_id"
     t.string "help_text"
     t.string "criteria_text"
-    t.integer "owner_id"
+    t.string "status"
   end
 
   create_table "team_members", id: false, force: :cascade do |t|
