@@ -17,7 +17,7 @@ class Question < ApplicationRecord
 
     #current thread / all threads
     @assessment = self.subthread.mr_thread.assessment
-    @length_of_asm = ApplicationController.helpers.grab_length(@assessment)
+    @length_of_asm = @assessment.grab_length
     @position = @length_of_asm.find_index(self)
     q = {
       question_id: self.id,
@@ -48,5 +48,10 @@ class Question < ApplicationRecord
     index = st.questions.find_index(self) + 1
     str = st.name[0..2] + ' Q#' + index.to_s
     return str
+  end
+
+  def all_info(lc)
+    @assessment = self.subthread.mr_thread.assessment
+    return {question: self.get_info, subthread: self.subthread, thread: self.subthread.mr_thread, assessment_id: @assessment.id, assessment_info: {targetDate: @assessment.target, additionalInfo: @assessment.scope}, level_change: lc }
   end
 end

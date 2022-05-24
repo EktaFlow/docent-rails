@@ -9,8 +9,7 @@ Rails.application.routes.draw do
   resources :users
 
   get '/next_question', to: 'assessments#show'
-  get '/questions/next', to: 'questions#next'
-  get '/questions/prev', to: 'questions#prev'
+  get '/next_action', to: 'questions#pick_action'
 
   get '/get_files', to: 'assessments#file_explorer'
   post '/add_to_question', to: 'file_attachments#add_to_question'

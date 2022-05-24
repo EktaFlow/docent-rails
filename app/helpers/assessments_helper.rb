@@ -11,9 +11,9 @@ module AssessmentsHelper
     last_thread = nil
 
     # guide.last_row
-    (4..guide.length - 1).each do |count|
+    (4..guide.length - 1).each do |i_count|
       #all rows past header rows, cycle through
-      current_row = guide[count]
+      current_row = guide[i_count]
       puts current_row
         #need to create 10 thread objects for each level of this thread
         (1..10).each do |count|
@@ -27,7 +27,7 @@ module AssessmentsHelper
             subthread = Subthread.create(name: current_row[1], mr_thread_id: thread.id)
 
             #get string of reference text to search in the Database sheet
-            str = '$' + letters[count - 1] + '$' + (i + 2).to_s
+            str = '$' + letters[count - 1] + '$' + (i_count + 2).to_s
             #get index of that row
             index = reftext.find_index(str)
             if index
@@ -51,7 +51,7 @@ module AssessmentsHelper
             #set criteria text for the subthread
             # subthread.criteria_text = current_row[count + 1]
             #get string of reference text to search in the Database sheet
-            str = '$' + letters[count - 1] + '$' + (i + 2).to_s
+            str = '$' + letters[count - 1] + '$' + (i_count + 2).to_s
             #get index of that row
             index = reftext.find_index(str)
             if index
@@ -104,32 +104,9 @@ module AssessmentsHelper
 
   end
 
-  #this returns an array that's all questions in assessment that match current mrl
-  #make sure test assessments have current_mrl filled in
-  def grab_length(assessment)
-    cmrl = assessment.current_mrl
-    @th = assessment.mr_threads.select {|thread| thread.mr_level == cmrl}
-    questions = []
-    @th.each do |thread|
-      thread.subthreads.each do |sth|
-        sth.questions.each do |q|
-          questions << q
-        end
-      end
-    end
-    return questions
-  end
 
-  def grab_count(qs)
-    cu = qs.find {|q| q.answered != nil}
-    cu_i = qs.find_index(cu)
-    if cu_i
-      cuu = (cu_i.to_i - 1)
-    else
-      cuu = 0
-    end
-    return [cuu, qs.length]
-  end
+
+
 
 end
 
