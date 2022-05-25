@@ -33,7 +33,7 @@ class Question < ApplicationRecord
     }
     if self.file_attachments.length
       self.file_attachments.each do |fa|
-        var ff = {
+        ff = {
           url: fa.outside_file.attachment ? fa.outside_file.attachment.blob.url : nil,
           name: fa.file_name,
         }
