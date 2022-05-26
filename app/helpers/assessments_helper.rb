@@ -81,7 +81,7 @@ module AssessmentsHelper
       #get all subthreads
       #making sure we're grabbing the right questions based on mrl
       th.subthreads.each do |sth|
-        matching = q_aire.select {|item| item["Sub"] == sth.name && item["MRL"] == th.mr_level}
+        matching = q_aire.select {|item| item["Sub"] != nil && item["Sub"][0..2] == sth.name[0..2] && item["MRL"] == th.mr_level }
         matching.each do |q|
           @question = Question.create(question_text: q["Question"], subthread: sth)
         end
