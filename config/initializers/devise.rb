@@ -25,7 +25,18 @@ Devise.setup do |config|
   # note that it will be overwritten if you use your own mailer class
   # with default "from" parameter.
   config.mailer_sender = 'please-change-me-at-config-initializers-devise@example.com'
+  config.navigational_formats = []
 
+  config.jwt do |jwt|
+    jwt.secret = "b27ee6e2ef45667384ab74a736a20007488a5a485527428d26392572d5525ba78266d49a5d8c2c0e62e07ec6766544fc9d62cd53c31d1c96242b70df4247bb38"
+    jwt.dispatch_requests = [
+        ['POST', %r{^/users/sign_in$}]
+      ]
+      jwt.revocation_requests = [
+        ['DELETE', %r{^/logout$}]
+      ]
+    jwt.expiration_time = 15.days.to_i
+  end
   # Configure the class responsible to send e-mails.
   # config.mailer = 'Devise::Mailer'
 
@@ -157,7 +168,7 @@ Devise.setup do |config|
   # initial account confirmation) to be applied. Requires additional unconfirmed_email
   # db field (see migrations). Until confirmed, new email is stored in
   # unconfirmed_email column, and copied to email column on successful confirmation.
-  config.reconfirmable = true
+  config.reconfirmable = false
 
   # Defines which key will be used when confirming an account
   # config.confirmation_keys = [:email]

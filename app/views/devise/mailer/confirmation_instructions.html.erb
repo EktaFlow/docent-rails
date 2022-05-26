@@ -1,5 +1,13 @@
-<p>Welcome <%= @email %>!</p>
+<h2>Welcome <%= @resource.name %> to Docent!</h2>
+<p>Prove your Readiness with <b>Docent</b></p>
+<p>Docent is an assessment collaboration and guidance tool for completing MRAs, or Manufacturing Readiness Assessments.</p>
 
-<p>You can confirm your account email through the link below:</p>
+<h4>What to expect from Docent:</h4>
+<p>- Easy Collaboration on Assessments. Add Teammates on the Docent Dashboard or when creating a new assessment</p>
+<p>- View <b>6</b> different reports compiling your data for review and presentation</p>
+<p>- Easy navigation through the Manufacturing Readiness Assessments</p>
+<p>- Tracking of past assessments, easily viewing created and shared assessments</p>
+
+<p>To get to using Docent confirm your account below:</p>
 
 <p><%= link_to 'Confirm my account', confirmation_url(@resource, confirmation_token: @token) %></p>

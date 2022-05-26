@@ -12,7 +12,8 @@ class Assessment < ApplicationRecord
     @team_members = []
     self.team_members.each do |tm|
       #grab team members emails
-      @team_members << {email: User.find(tm.user_id).email, role: tm.role}
+      tm_u = User.find(tm.user_id)
+      @team_members << {name: tm_u.name, email: tm_u.email, role: tm.role}
     end
 
     @length = self.grab_length
@@ -134,6 +135,7 @@ class Assessment < ApplicationRecord
         subthread = {
           id: sth.id,
           name: sth.name,
+          criteria_text: sth.criteria_text,
           questions: []
         }
         sth.questions.each do |q|

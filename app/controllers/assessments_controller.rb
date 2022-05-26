@@ -1,4 +1,6 @@
 class AssessmentsController < ApplicationController
+  before_action :authenticate_user!
+
   def index
     #get all assessments for current_user both shared and owned
     #do we need to separately grab the team members for each of these?
@@ -71,6 +73,19 @@ class AssessmentsController < ApplicationController
     @assessment = Assessment.find(params[:id])
     @assessment.destroy
     render json: {success: true}
+  end
+
+  def grab_criteria_data
+    if params[:id] != "-1"
+      @assessment = Assessment.find(params[:id])
+    else
+      @assessment = Assessment.where(owner: current_user)[0]
+    end
+    if @assessment
+      render json: {threads: @assessment.report_grouping, info: @assessment, team_members: @assessment.team_members}
+    else
+      render json: {errors: @assessment.errors.full_messages}
+    end
   end
 
 
