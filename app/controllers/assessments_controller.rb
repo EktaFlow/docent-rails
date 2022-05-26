@@ -82,7 +82,7 @@ class AssessmentsController < ApplicationController
       @assessment = Assessment.where(owner: current_user)[0]
     end
     if @assessment
-      render json: {threads: @assessment.report_grouping}
+      render json: {threads: @assessment.report_grouping, info: @assessment, team_members: @assessment.team_members}
     else
       render json: {errors: @assessment.errors.full_messages}
     end

@@ -135,7 +135,7 @@ class Assessment < ApplicationRecord
         subthread = {
           id: sth.id,
           name: sth.name,
-          help_text: sth.help_text,
+          criteria_text: sth.criteria_text,
           questions: []
         }
         sth.questions.each do |q|
