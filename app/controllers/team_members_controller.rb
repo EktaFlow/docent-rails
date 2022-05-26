@@ -3,15 +3,17 @@ class TeamMembersController < ApplicationController
   end
 
   def create
-    @assessment = Assessment.find(params[:assessment_id])
+    @assessment = Assessment.find(params[:user][:assessment_id])
     @user = User.find_by(email: params[:user][:email])
     if @user
-      @tm = TeamMember.create(user: @user, assessment: @assessment)
-      return json: {team_member: @tm, newUser: false}
+      @tm = TeamMember.create(user: @user, assessment: @assessment, role: params[:user][:role])
+      # UserMailer.shared_assessment(@user, current_user, @assessment).deliver
+      render json: {team_member: @user.email, assessment: @assessment.get_info_for_dashboard('owned'), newUser: false}
     else
-      @u = User.invite!(email: params[:user][:email], name: params[:user][:name])
-      @tm = TeamMember.create(user: @u, assessment: @assessment)
-      return json: {team_member: @tm, newUser: true}
+      @u = User.invite!(email: params[:user][:email])
+      @tm = TeamMember.create(user: @u, assessment: @assessment, role: params[:user][:role])
+       # UserMailer.shared_assessment(@u, current_user, @assessment).deliver
+      render json: {team_member: @u.email, assessment: @assessment.get_info_for_dashboard('owned'), newUser: true}
     end
   end
 end

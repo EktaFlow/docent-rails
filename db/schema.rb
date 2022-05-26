@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_05_23_151917) do
+ActiveRecord::Schema.define(version: 2022_05_25_195114) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -100,6 +100,12 @@ ActiveRecord::Schema.define(version: 2022_05_23_151917) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
+  create_table "jwt_denylist", force: :cascade do |t|
+    t.string "jti", null: false
+    t.datetime "exp", precision: 6, null: false
+    t.index ["jti"], name: "index_jwt_denylist_on_jti"
+  end
+
   create_table "mr_threads", force: :cascade do |t|
     t.string "name"
     t.integer "mr_level"
@@ -147,8 +153,19 @@ ActiveRecord::Schema.define(version: 2022_05_23_151917) do
     t.string "confirmation_token"
     t.datetime "confirmed_at", precision: 6
     t.datetime "confirmation_sent_at", precision: 6
+    t.string "invitation_token"
+    t.datetime "invitation_created_at", precision: 6
+    t.datetime "invitation_sent_at", precision: 6
+    t.datetime "invitation_accepted_at", precision: 6
+    t.integer "invitation_limit"
+    t.string "invited_by_type"
+    t.bigint "invited_by_id"
+    t.integer "invitations_count", default: 0
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["invitation_token"], name: "index_users_on_invitation_token", unique: true
+    t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
+    t.index ["invited_by_type", "invited_by_id"], name: "index_users_on_invited_by"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
