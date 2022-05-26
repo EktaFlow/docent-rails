@@ -45,7 +45,7 @@ module AssessmentsHelper
             #first column of this row is nil (still part of previous thread) so we just set the subthread to the last thread id
             #create subthread for this row
             # binding.pry
-            @ths = MrThread.where(mr_level: count)
+            @ths = MrThread.where(mr_level: count, assessment: created_assessment)
             @thread = @ths.select {|th| th.name[0] == last_thread}[0]
             subthread = Subthread.create(name: current_row[1], mr_thread_id: @thread.id)
             #set criteria text for the subthread
