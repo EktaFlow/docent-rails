@@ -2,10 +2,11 @@ class Users::RegistrationsController < Devise::RegistrationsController
   respond_to :json
 
   def create
+    # binding.pry
     build_resource(sign_up_params)
     resource.save
+    resource.skip_confirmation!
     sign_up(resource_name, resource) if resource.persisted?
-
     resource.persisted? ? register_success : register_failed
   end
 
