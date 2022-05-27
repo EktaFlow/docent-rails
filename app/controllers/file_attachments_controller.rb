@@ -24,6 +24,8 @@ class FileAttachmentsController < ApplicationController
       @question = Question.find(params[:question_id])
       if @question
         @faa = FileAttachmentAnswer.create(file_attachment: @file_attachment, question: @question)
+        puts @faa
+        puts @file_attachment
         render json: {file: @file_attachment, question: @question}
       else
         render json: {errors: 'question not found'}

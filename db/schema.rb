@@ -112,6 +112,7 @@ ActiveRecord::Schema.define(version: 2022_05_25_195114) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "assessment_id"
+    t.integer "owner_id"
   end
 
   create_table "questions", force: :cascade do |t|
@@ -131,6 +132,7 @@ ActiveRecord::Schema.define(version: 2022_05_25_195114) do
     t.integer "mr_thread_id"
     t.string "help_text"
     t.string "criteria_text"
+    t.integer "owner_id"
     t.string "status"
   end
 

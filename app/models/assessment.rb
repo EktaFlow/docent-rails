@@ -38,6 +38,7 @@ class Assessment < ApplicationRecord
         },
         team_members: @team_members
       }
+      # binding.pry
     else
       group = {
         assessment: {
@@ -102,6 +103,7 @@ class Assessment < ApplicationRecord
     if self.file_attachments.length > 0
       self.file_attachments.each do |fa|
         f = {
+          id: fa.id,
           url: fa.outside_file.attachment ? fa.outside_file.attachment.blob.url : nil,
           name: fa.file_name,
           created_at: fa.created_at,
