@@ -7,6 +7,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
     resource.save
     resource.skip_confirmation!
     sign_up(resource_name, resource) if resource.persisted?
+    resource.confirm
     resource.persisted? ? register_success : register_failed
   end
 
@@ -24,7 +25,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
     render json: { message: 'Signed up.' }
   end
   def register_failed
-    render json: { message: "Signed up failure." }
+    render json: { message: "Signed up failure.", errors: resource.errors.full_messages }
   end
 
   def sign_up_params
