@@ -16,6 +16,7 @@ Rails.application.routes.draw do
   post '/add_to_question', to: 'file_attachments#add_to_question'
   get '/get_assessment', to: 'assessments#grab_base_report'
   get '/grab_criteria', to: 'assessments#grab_criteria_data'
+  get '/next_specific_question', to: 'questions#show'
   devise_for :users,
              controllers: {
                  sessions: 'users/sessions',

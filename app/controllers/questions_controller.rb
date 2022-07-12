@@ -4,8 +4,9 @@ class QuestionsController < ApplicationController
 
   #when navigating from a report
   def show
+    # binding.pry
     @question = Question.find(params[:id])
-    render json: {question: @question.get_info, subthread: @question.subthread, thread: @question.subthread.mr_thread, level_change: 'none'}
+    render json: @question.all_info('none')
   end
 
   #next/previous from questions from questions page
