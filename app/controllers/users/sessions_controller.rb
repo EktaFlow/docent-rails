@@ -3,6 +3,7 @@ class Users::SessionsController < Devise::SessionsController
   def destroy
     super
   end
+
   private
   def respond_with(resource, _opts = {})
     if resource.persisted?
