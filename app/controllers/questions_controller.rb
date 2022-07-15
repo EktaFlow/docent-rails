@@ -13,12 +13,14 @@ class QuestionsController < ApplicationController
   def pick_action
     @current_question = Question.find(params[:question_id])
     @assessment = Assessment.find(params[:assessment_id])
+    #grab length gets all questions for the assessment (use for nonLS assessments)
     @questions = @assessment.grab_length
     #for non dropped subthreads
     @cq_index = @questions.find_index(@current_question)
     #for when question/subthread has been dropped
     subthread = @current_question.subthread
     position_in_subthread = subthread.questions.find_index(@current_question)
+    #these two variables are how to move in the subthread (forward/backwards)
     @act = -1
     @pis = -1
     if params[:movement] == 'next'
@@ -96,6 +98,7 @@ class QuestionsController < ApplicationController
       if params[:movement] == 'prev'
         #switching back to target mrl, because level switching only applies to current subthread
         if @assessment.target_mrl != @assessment.current_mrl
+          #we need to add this call if we do any other navigation, so we dont possibly mess up the level switching status and accidently grab the wrong question
           @assessment.update(current_mrl: @assessment.target_mrl)
           #grabbing the previous subthread
           @next_question = @assessment.switch_level(@current_question, 'backwards')

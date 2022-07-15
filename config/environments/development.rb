@@ -49,7 +49,7 @@ Rails.application.configure do
   config.action_mailer.perform_deliveries = true
   # config.action_mailer.default_options = {from: 'info@mfgdocent.com'}
   config.action_mailer.smtp_settings = {
-    address: '',
+    address: 'mail.mfgdocent.com',
     port: 465,
     domain: 'mfgdocent.com',
     user_name: 'info@mfgdocent.com',

@@ -11,17 +11,28 @@ class AnswersController < ApplicationController
   end
 
   def create
+    #go through each of the answer params (params.map ? how to iterate through an object)
+    #if all answer params match @question.answers.last
+    #then don't save new answer
     @question = Question.find(params[:question_id])
+    #do the above right here
+    #check if question has any answers b4 this
+    #if Answer.check_for_dupe(answer_params, @question.answers.last)
     @answer = Answer.create(answer_params)
     @question.answers << @answer
     @question.update(current_answer: @answer.answer)
     @question.update(answered: true)
     if @question == @question.subthread.questions.last
-      if @answer.answer == 'yes'
-        @question.subthread.update(status: 'passed')
-      elsif @answer.answer == 'no'
-        @question.subthread.update(status: 'failed')
+      #use this status to update UI ?
+      failed = false
+      @question.subthread.questions.each do |q|
+        if q.answers.length > 0 && q.answers.last.answer == 'no'
+          #should exit the for each loop once we have hit a failed question
+          failed = true
+        end
       end
+      #pass true or false based on if there is a failed answer in one of the questions
+      @question.subthread.update(status: failed == true ? 'failed' : 'passed')
     end
     if @answer.save
       render json: {answer: @answer}
