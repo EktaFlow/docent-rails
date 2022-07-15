@@ -9,6 +9,12 @@ class User < ApplicationRecord
 
   has_many :team_members
 
+
+
+
+
+
+
   # def generate_jwt
   #   JWT.encode({ id: id,
   #     exp: 60.days.from_now.to_i },
