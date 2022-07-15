@@ -51,6 +51,7 @@ class Question < ApplicationRecord
   end
 
   def all_info(lc)
+    # binding.pry
     @assessment = self.subthread.mr_thread.assessment
     return {question: self.get_info, subthread: self.subthread, thread: self.subthread.mr_thread, assessment_id: @assessment.id, assessment_info: {targetDate: @assessment.target, additionalInfo: @assessment.scope}, level_change: lc }
   end

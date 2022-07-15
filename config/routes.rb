@@ -18,6 +18,8 @@ Rails.application.routes.draw do
   get '/grab_criteria', to: 'assessments#grab_criteria_data'
   get '/send_reset', to: 'users#reset_password_request'
   put '/reset_pwd', to: 'users#reset_pwd'
+  get '/next_specific_question', to: 'questions#show'
+
   devise_for :users,
              controllers: {
                  sessions: 'users/sessions',
