@@ -45,10 +45,10 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
-  config.action_mailer.delivery_method = :smtp
+  ActionMailer::Base.delivery_method = :smtp
   config.action_mailer.perform_deliveries = true
   # config.action_mailer.default_options = {from: 'info@mfgdocent.com'}
-  config.action_mailer.smtp_settings = {
+  ActionMailer::Base.smtp_settings = {
     address: 'mail.mfgdocent.com',
     port: 465,
     domain: 'mfgdocent.com',
