@@ -214,20 +214,30 @@ class Assessment < ApplicationRecord
       # binding.pry
       #is the current subthread you're in, the first one of the dropped MrThread
       #MrThread A level 3 :: A.1, A.2
+      subthread_start = cq.subthread.name[0..2]
+      sth = subs.select {|st| st.name[0..2] == subthread_start}[0]
       if th.subthreads.first != sth
         #this needs the same build out if we're switching threads (and not just subthreads, because right now we're not even checking for that)
         #finds the index of the current dropped MrThread
         #most likely the issue spot? i can't remember what this is exactly supposed to do
-        index = ths.find_index(th)
-        if index != 0
-          @new_th = ths[index - 1]
-          # binding.pry
-          subs = @new_th.subthreads.select { |sth| sth.questions.length > 0 }
-          return subs.last.questions.last
-        end
+        subthread_index = subs.find_index(sth)
+        prev_subthread = subs[subthread_index - 1]
+        return prev_subthread.questions[0]
+        # index = ths.find_index(th)
+        # if index != 0
+        #   @new_th = ths[index - 1]
+        #   # binding.pry
+        #   subs = @new_th.subthreads.select { |sth| sth.questions.length > 0 }
+        #   return subs.last.questions.last
+        # end
       else
         #if the subthread is the first one
         #we'll need to drop down to the next subthread
+        index_of_thread = ths.find_index(th)
+        new_thread = ths[index_of_thread - 1]
+        new_thread_subthreads = new_thread.subthreads..select { |sth| sth.questions.length > 0 }
+        #then grab last question from last subthread of the new thread
+        return new_thread_subthreads.last.questions.last
       end
     end
   end
