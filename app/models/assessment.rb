@@ -260,14 +260,14 @@ class Assessment < ApplicationRecord
   end
 
   def grab_count(qs)
-    cu = qs.find {|q| q.answered != nil}
-    cu_i = qs.find_index(cu)
+    cu = qs.select {|q| q.answered != nil} #finds and returns all questions that are answered
+    cu_i = qs.find_index(cu) #finds index of 
     if cu_i
       cuu = (cu_i.to_i - 1)
     else
       cuu = 0
     end
-    return [cuu, qs.length]
+    return [cu.length, qs.length]
   end
 
 
