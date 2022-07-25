@@ -71,13 +71,15 @@ class Assessment < ApplicationRecord
   def list_of_threads
     @threads = self.mr_threads.select {|th| th.mr_level == self.current_mrl}
     @as = []
+    ordered_threads = @threads.sort_by {|obj| obj.name.downcase}
     @threads.each do |th|
       thread = {
         id: th.id,
         name: th.name,
         subthreads: []
       }
-      th.subthreads.each do |sth|
+      ordered_subthreads = th.subthreads.sort_by {|obj| obj.name.downcase}
+      ordered_subthreads.each do |sth|
         if sth.questions.length != 0
           subthread = {
             id: sth.id,
@@ -127,13 +129,15 @@ class Assessment < ApplicationRecord
   def report_grouping
     @threads = self.mr_threads.select {|th| th.mr_level == self.current_mrl}
     @as = []
+    ordered_threads = @threads.sort_by {|obj| obj.name.downcase}
     @threads.each do |th|
       thread = {
         id: th.id,
         name: th.name,
         subthreads: []
       }
-      th.subthreads.each do |sth|
+      ordered_subthreads = th.subthreads.sort_by {|obj| obj.name.downcase}
+      ordered_subthreads.each do |sth|
         subthread = {
           id: sth.id,
           name: sth.name,
@@ -250,7 +254,8 @@ class Assessment < ApplicationRecord
     @th = self.mr_threads.select {|thread| thread.mr_level == cmrl}
     questions = []
     @th.each do |thread|
-      thread.subthreads.each do |sth|
+      ordered_subthreads = thread.subthreads.sort_by {|obj| obj.name.downcase}
+      ordered_subthreads.each do |sth|
         sth.questions.each do |q|
           questions << q
         end
