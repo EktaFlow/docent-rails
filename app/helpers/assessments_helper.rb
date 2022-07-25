@@ -81,10 +81,10 @@ module AssessmentsHelper
 
   #looks like questions are starting in thread B and not A
   def set_questions(assessment)
-    if created_assessment.deskbook_version == "2018" 
+    if assessment.deskbook_version == "2018" 
       xlsx = Roo::Spreadsheet.open('./app/assets/xls/Users_Guide_2018_Version1.xlsm')
       q_aire = xlsx.sheet("Questionnaire").parse(headers: true)
-    elsif created_assessment.deskbook_version == "2020" 
+    elsif assessment.deskbook_version == "2020" 
       xlsx = Roo::Spreadsheet.open('./app/assets/xls/2020_deskbook.xlsm')
       q_aire = xlsx.sheet("Questionnaire").parse(headers: true)
     end

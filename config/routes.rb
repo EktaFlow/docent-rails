@@ -20,6 +20,11 @@ Rails.application.routes.draw do
   put '/reset_pwd', to: 'users#reset_pwd'
   get '/next_specific_question', to: 'questions#show'
 
+  put '/delete_file_question', to: 'questions#update_files'
+  delete '/delete_file_assessment', to: 'file_attachments#destroy'
+
+  put '/update_assessments', to: 'assessments#update'
+
   devise_for :users,
              controllers: {
                  sessions: 'users/sessions',

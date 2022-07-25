@@ -61,6 +61,21 @@ class AssessmentsController < ApplicationController
     end
   end
 
+  def update 
+    @assessment = Assessment.find(assessment_params[:id])
+    # @assessment.update(name: params[:assess_name])
+
+    # binding.pry
+    #trying to update all params that are not null (for edit assessment)
+    assessment_params.each do |key, value|
+      if params["#{key}"] != nil && params["#{key}"] != ''
+        @assessment.update("#{key}" => params["#{key}"])
+      end
+    end
+    # @assessment.update_attributes(params)
+    render json: {assessment: @assessment}
+  end
+
   def grab_base_report
     @assessment = Assessment.find(params[:id])
     if @assessment

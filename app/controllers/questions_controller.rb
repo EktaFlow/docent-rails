@@ -9,6 +9,36 @@ class QuestionsController < ApplicationController
     render json: @question.all_info('none')
   end
 
+  #updates files for question --> removes FileAttachmentAnswer
+  def update_files
+    @q = Question.find(params[:question_id])
+    f_id = params[:file_id]
+    @file_att_ans = FileAttachmentAnswer.find_by(file_attachment_id: f_id)
+    if @file_att_ans 
+      @q.file_attachment_answers.delete(@file_att_ans)
+      render json: {success: true}
+    else 
+      render json: {errors: 'file not found'}
+    end
+  end
+
+  def question_delete_file
+    @q = Question.find(params[:question_id])
+    @file_att_ans = FileAttachmentAnswer.find_by(file_id: params[:file_id])
+    if @q 
+      if @file_att_ans 
+        @q.file_attachment_answers.delete(@file_att_ans)
+        render json: {success: true}
+      else 
+        render json: {errors: 'file not found'}
+      end
+    else 
+      render json: {errors: 'question not found'}
+    end
+    
+    
+  end
+
   #next/previous from questions from questions page
   def pick_action
     @current_question = Question.find(params[:question_id])
