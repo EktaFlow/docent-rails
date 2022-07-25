@@ -57,7 +57,7 @@ class AnswersController < ApplicationController
 
   def answer_params
     params.require(:answer).permit(
-      :id,
+      # :id,
       :answer,
       :likelihood,
       :consequence,

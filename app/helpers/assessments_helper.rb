@@ -1,11 +1,19 @@
 module AssessmentsHelper
   require 'roo'
   def get_schema(created_assessment)
-    xlsx = Roo::Spreadsheet.open('./app/assets/xls/2020_deskbook.xlsm')
+    # xlsx = Roo::Spreadsheet.open('./app/assets/xls/2020_deskbook.xlsm')
 
-    guide = xlsx.sheet("Guide").parse()
-    db = xlsx.sheet("Database")
-    reftext = db.column(1)
+    if created_assessment.deskbook_version == "2018" 
+      xlsx = Roo::Spreadsheet.open('./app/assets/xls/Users_Guide_2018_Version1.xlsm')
+      guide = xlsx.sheet("MRL Users Guide").parse()
+      #need reference text?
+    elsif created_assessment.deskbook_version == "2020" 
+      xlsx = Roo::Spreadsheet.open('./app/assets/xls/2020_deskbook.xlsm')
+      guide = xlsx.sheet("Guide").parse()
+      db = xlsx.sheet("Database")
+      reftext = db.column(1)
+    end
+    
     letters = ['C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
 
     last_thread = nil
@@ -73,8 +81,15 @@ module AssessmentsHelper
 
   #looks like questions are starting in thread B and not A
   def set_questions(assessment)
-    xlsx = Roo::Spreadsheet.open('./app/assets/xls/2020_deskbook.xlsm')
-    q_aire = xlsx.sheet("Questionnaire").parse(headers: true)
+    if assessment.deskbook_version == "2018" 
+      xlsx = Roo::Spreadsheet.open('./app/assets/xls/Users_Guide_2018_Version1.xlsm')
+      q_aire = xlsx.sheet("Questionnaire").parse(headers: true)
+    elsif assessment.deskbook_version == "2020" 
+      xlsx = Roo::Spreadsheet.open('./app/assets/xls/2020_deskbook.xlsm')
+      q_aire = xlsx.sheet("Questionnaire").parse(headers: true)
+    end
+    # xlsx = Roo::Spreadsheet.open('./app/assets/xls/2020_deskbook.xlsm')
+    # q_aire = xlsx.sheet("Questionnaire").parse(headers: true)
 
     assessment.mr_threads.each do |th|
       #get all threads
@@ -91,14 +106,14 @@ module AssessmentsHelper
 
   def add_team_members(team_members, assessment)
     team_members.each do |tm|
-      user = User.find_by(email: tm.email)
+      user = User.find_by(email: tm[:email])
       if user
-        ntm = TeamMember.create(assessment_id: assessment.id, user_id: user.id, role: tm.role)
-        assessment.team_members << ntm
+        newTM = TeamMember.create(assessment_id: assessment.id, user_id: user.id, role: tm[:role])
+        assessment.team_members << newTM
       else
-        nUser = User.invite!(email: tm.email)
-        ntm = TeamMember.create(assessment_id: assessment.id, user_id: nUser.id, role: tm.role)
-        assessment.team_members << ntm
+        nUser = User.invite!(email: tm[:email])
+        newTm = TeamMember.create(assessment_id: assessment.id, user_id: nUser.id, role: tm[:role])
+        assessment.team_members << newTm
       end
     end
 

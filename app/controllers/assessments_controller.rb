@@ -12,13 +12,21 @@ class AssessmentsController < ApplicationController
       assessments_with_info << am.get_info_for_dashboard('owned')
     end
 
-    #get shared assessments & assessment info
+    #get shared assessments & assessment inf
     tms = TeamMember.where(user_id: current_user.id)
     tms.each do |t|
-      assessment = Assessment.find_by(assessment_id: t.assessment.id)
-      assessments_with_info << assessment.get_info_for_dashboard('shared')
+      #if assessment of team member exists
+      if Assessment.find_by(id: t.assessment_id)
+        assessment = Assessment.find_by(id: t.assessment_id)
+        assessments_with_info << assessment.get_info_for_dashboard('shared')
+      end
     end
 
+  #   tms.each do |t|
+  #     assessment = Assessment.find_by(id: t.assessment.id)
+  #     assessments_with_info << assessment.get_info_for_dashboard('shared')
+  #   end
+    
     render json: {assessments: assessments_with_info}
   end
 
@@ -34,6 +42,7 @@ class AssessmentsController < ApplicationController
 
   def create
     @assessment = Assessment.new(assessment_params)
+    # binding.pry
     @assessment.owner = current_user
     @assessment.current_mrl = params[:target_mrl]
     if params[:assessment][:level_switching] == nil
@@ -42,12 +51,29 @@ class AssessmentsController < ApplicationController
     if @assessment.save
       @schema = helpers.get_schema(@assessment)
       if params[:team_members]
+        # binding.pry
         helpers.add_team_members(params[:team_members], @assessment)
+        # @assessment.add_team_members(params[:team_members])
       end
       render json: {assessment_id: @assessment.id}
     else
       render json: {errors: @assessment.errors}, status: :unprocessable_entity
     end
+  end
+
+  def update 
+    @assessment = Assessment.find(assessment_params[:id])
+    # @assessment.update(name: params[:assess_name])
+
+    # binding.pry
+    #trying to update all params that are not null (for edit assessment)
+    assessment_params.each do |key, value|
+      if params["#{key}"] != nil && params["#{key}"] != ''
+        @assessment.update("#{key}" => params["#{key}"])
+      end
+    end
+    # @assessment.update_attributes(params)
+    render json: {assessment: @assessment}
   end
 
   def grab_base_report
@@ -70,7 +96,10 @@ class AssessmentsController < ApplicationController
   end
 
   def destroy
+    # @assessment.team_members.destroy_all
     @assessment = Assessment.find(params[:id])
+    # tms = TeamMember.where(assessment_id: params[:id])
+    # tms.destroy
     @assessment.destroy
     render json: {success: true}
   end

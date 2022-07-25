@@ -34,6 +34,17 @@ class FileAttachmentsController < ApplicationController
       render json: {errors: 'File Not Found'}
     end
   end
+  
+  def destroy 
+    @assessment = Assessment.find(params[:assessment_id])
+    @file_attachment = FileAttachment.find(params[:file_id])
+    if @file_attachment
+      @assessment.file_attachments.delete(@file_attachment)
+      render json: {success: true}
+    else 
+      render json: {errors: 'File Not Found'}
+    end
+  end
 
   def file_attachment_params
     params.require(:file_attachment).permit(:assessment_id, :question_id, :file_name, :outside_file)

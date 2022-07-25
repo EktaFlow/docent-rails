@@ -27,6 +27,8 @@ class Question < ApplicationRecord
       position: @position + 1,
       assessment_length: @length_of_asm.length,
       current_answer: self.answers.empty? ? [] : self.answers.last,
+      all_answers: self.answers.empty? ? [] : self.answers.select{|a| a.answer != nil},
+      # new_answer: Answer.create, 
       structure: @assessment.list_of_threads,
       current_mrl: self.subthread.mr_thread.mr_level,
       files: []
