@@ -1,20 +1,20 @@
 module AssessmentsHelper
   require 'roo'
-  def get_schema(created_assessment, id)
+  def get_schema(created_assessment, id, p)
     # xlsx = Roo::Spreadsheet.open('./app/assets/xls/2020_deskbook.xlsm')
 
-    if created_assessment.deskbook_version == "2018" 
+    if created_assessment.deskbook_version == "2018"
       xlsx = Roo::Spreadsheet.open('./app/assets/xls/Users_Guide_2018_Version1.xlsm')
       guide = xlsx.sheet("MRL Users Guide").parse()
       db = xlsx.sheet("Database")
       reftext = db.column(1)
-    elsif created_assessment.deskbook_version == "2020" 
+    elsif created_assessment.deskbook_version == "2020"
       xlsx = Roo::Spreadsheet.open('./app/assets/xls/2020_deskbook.xlsm')
       guide = xlsx.sheet("Guide").parse()
       db = xlsx.sheet("Database")
       reftext = db.column(1)
     end
-    
+
     letters = ['C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
 
     last_thread = nil
@@ -23,6 +23,9 @@ module AssessmentsHelper
     (4..guide.length - 1).each do |i_count|
       #all rows past header rows, cycle through
       current_row = guide[i_count]
+      if current_row[0] != nil
+        next if p[:threads].exclude? current_row[0][0]
+      end
       puts current_row
       # binding.pry
         #need to create 10 thread objects for each level of this thread
@@ -57,6 +60,7 @@ module AssessmentsHelper
             # binding.pry
             @ths = MrThread.where(mr_level: count, assessment: created_assessment)
             @thread = @ths.select {|th| th.name[0] == last_thread}[0]
+            next if @thread == nil
             subthread = Subthread.create(name: current_row[1], mr_thread_id: @thread.id)
             #set criteria text for the subthread
             # subthread.criteria_text = current_row[count + 1]
@@ -83,10 +87,10 @@ module AssessmentsHelper
 
   #looks like questions are starting in thread B and not A
   def set_questions(assessment)
-    if assessment.deskbook_version == "2018" 
+    if assessment.deskbook_version == "2018"
       xlsx = Roo::Spreadsheet.open('./app/assets/xls/Users_Guide_2018_Version1.xlsm')
       q_aire = xlsx.sheet("Questionnaire").parse(headers: true)
-    elsif assessment.deskbook_version == "2020" 
+    elsif assessment.deskbook_version == "2020"
       xlsx = Roo::Spreadsheet.open('./app/assets/xls/2020_deskbook.xlsm')
       q_aire = xlsx.sheet("Questionnaire").parse(headers: true)
     end
