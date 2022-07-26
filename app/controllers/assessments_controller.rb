@@ -49,7 +49,7 @@ class AssessmentsController < ApplicationController
       @assessment.level_switching = false
     end
     if @assessment.save
-      @schema = helpers.get_schema(@assessment)
+      @schema = helpers.get_schema(@assessment, @assessment.id)
       if params[:team_members]
         # binding.pry
         helpers.add_team_members(params[:team_members], @assessment)
@@ -62,16 +62,18 @@ class AssessmentsController < ApplicationController
   end
 
   def update 
-    @assessment = Assessment.find(assessment_params[:id])
+    @assessment = Assessment.find(params[:id])
+    # binding.pry
     # @assessment.update(name: params[:assess_name])
+    @assessment.update(assessment_params)
 
     # binding.pry
     #trying to update all params that are not null (for edit assessment)
-    assessment_params.each do |key, value|
-      if params["#{key}"] != nil && params["#{key}"] != ''
-        @assessment.update("#{key}" => params["#{key}"])
-      end
-    end
+    # assessment_params.each do |key, value|
+    #   if params["#{key}"] != nil && params["#{key}"] != ''
+    #     @assessment.update("#{key}" => params["#{key}"])
+    #   end
+    # end
     # @assessment.update_attributes(params)
     render json: {assessment: @assessment}
   end
@@ -98,6 +100,8 @@ class AssessmentsController < ApplicationController
   def destroy
     # @assessment.team_members.destroy_all
     @assessment = Assessment.find(params[:id])
+    helpers.delete_all_attachments(@assessment)
+    # @faa = FileAttach
     # tms = TeamMember.where(assessment_id: params[:id])
     # tms.destroy
     @assessment.destroy
@@ -115,6 +119,23 @@ class AssessmentsController < ApplicationController
     else
       render json: {errors: @assessment.errors.full_messages}
     end
+  end
+
+  def get_all_tm
+    @assessment = Assessment.find(params[:id])
+    @tms_info = []
+    @assessment.team_members.each do |tm|
+      @user = User.find_by(id: tm.user_id)
+      if @user 
+        @tm_info = {
+          email: @user.email, 
+          role: tm.role
+        }
+        @tms_info << @tm_info
+      end
+    end
+
+    render json: {team_members: @tms_info}
   end
 
 
