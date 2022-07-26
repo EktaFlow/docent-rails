@@ -24,6 +24,7 @@ Rails.application.routes.draw do
   delete '/delete_file_assessment', to: 'file_attachments#destroy'
 
   put '/update_assessments', to: 'assessments#update'
+  get '/get_all_tm', to: 'assessments#get_all_tm'
 
   devise_for :users,
              controllers: {

@@ -1,12 +1,13 @@
 module AssessmentsHelper
   require 'roo'
-  def get_schema(created_assessment)
+  def get_schema(created_assessment, id)
     # xlsx = Roo::Spreadsheet.open('./app/assets/xls/2020_deskbook.xlsm')
 
     if created_assessment.deskbook_version == "2018" 
       xlsx = Roo::Spreadsheet.open('./app/assets/xls/Users_Guide_2018_Version1.xlsm')
       guide = xlsx.sheet("MRL Users Guide").parse()
-      #need reference text?
+      db = xlsx.sheet("Database")
+      reftext = db.column(1)
     elsif created_assessment.deskbook_version == "2020" 
       xlsx = Roo::Spreadsheet.open('./app/assets/xls/2020_deskbook.xlsm')
       guide = xlsx.sheet("Guide").parse()
@@ -23,6 +24,7 @@ module AssessmentsHelper
       #all rows past header rows, cycle through
       current_row = guide[i_count]
       puts current_row
+      # binding.pry
         #need to create 10 thread objects for each level of this thread
         (1..10).each do |count|
           #if thread is not already saved, do this cycle
@@ -88,8 +90,6 @@ module AssessmentsHelper
       xlsx = Roo::Spreadsheet.open('./app/assets/xls/2020_deskbook.xlsm')
       q_aire = xlsx.sheet("Questionnaire").parse(headers: true)
     end
-    # xlsx = Roo::Spreadsheet.open('./app/assets/xls/2020_deskbook.xlsm')
-    # q_aire = xlsx.sheet("Questionnaire").parse(headers: true)
 
     assessment.mr_threads.each do |th|
       #get all threads
@@ -117,6 +117,12 @@ module AssessmentsHelper
       end
     end
 
+  end
+
+  def delete_all_attachments(assessment)
+    assessment.file_attachments.each do |fa|
+      fa.destroy
+    end
   end
 
 

@@ -4,7 +4,7 @@ class Assessment < ApplicationRecord
   has_many :mr_threads, dependent: :destroy
   has_many :file_attachments, dependent: :destroy
 
-  has_many :team_members, dependent: :destroy
+  has_many :team_members
   has_many :users, through: :team_members
 
   def get_info_for_dashboard(type)
