@@ -49,7 +49,7 @@ class AssessmentsController < ApplicationController
       @assessment.level_switching = false
     end
     if @assessment.save
-      @schema = helpers.get_schema(@assessment, @assessment.id)
+      @schema = helpers.get_schema(@assessment, @assessment.id, params)
       if params[:team_members]
         # binding.pry
         helpers.add_team_members(params[:team_members], @assessment)
@@ -81,7 +81,8 @@ class AssessmentsController < ApplicationController
   def grab_base_report
     @assessment = Assessment.find(params[:id])
     if @assessment
-      render json: {threads: @assessment.report_grouping, info: @assessment, team_members: @assessment.team_members}
+      render json: {threads: @assessment.report_grouping, info: @assessment, team_members: @assessment.team_members, all_threads: @assessment.level_switching ? @assessment.get_all_threads : nil}
+      # render json: {threads: @assessment.report_grouping, info: @assessment, team_members: @assessment.team_members}
     else
       render json: {errors: @assessment.errors.full_messages}
     end

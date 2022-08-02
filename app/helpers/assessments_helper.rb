@@ -1,6 +1,6 @@
 module AssessmentsHelper
   require 'roo'
-  def get_schema(created_assessment, id)
+  def get_schema(created_assessment, id, p)
     # xlsx = Roo::Spreadsheet.open('./app/assets/xls/2020_deskbook.xlsm')
 
     if created_assessment.deskbook_version == "2018" 
@@ -16,14 +16,20 @@ module AssessmentsHelper
     end
     
     letters = ['C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
-
+    th_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
     last_thread = nil
-
+    
     # guide.last_row
     (4..guide.length - 1).each do |i_count|
       #all rows past header rows, cycle through
       current_row = guide[i_count]
       puts current_row
+      if current_row[0] != nil 
+        # binding.pry
+        next if p[:threads].exclude? current_row[0][0]
+      end
+      
+      # if current_row[0] 
       # binding.pry
         #need to create 10 thread objects for each level of this thread
         (1..10).each do |count|
@@ -49,6 +55,7 @@ module AssessmentsHelper
 
               subthread.criteria_text = ref_row[2]
             end
+            # subthread.in_assessment = true if count == p[:target_mrl]
             subthread.save
           else
             #need to create 10 thread objects for each level of this thread
@@ -57,6 +64,7 @@ module AssessmentsHelper
             # binding.pry
             @ths = MrThread.where(mr_level: count, assessment: created_assessment)
             @thread = @ths.select {|th| th.name[0] == last_thread}[0]
+            next if @thread == nil
             subthread = Subthread.create(name: current_row[1], mr_thread_id: @thread.id)
             #set criteria text for the subthread
             # subthread.criteria_text = current_row[count + 1]
@@ -71,10 +79,27 @@ module AssessmentsHelper
               subthread.help_text = ref_row[3]
               subthread.criteria_text = ref_row[2]
             end
+            # subthread.in_assessment = true if count == p[:target_mrl]
             subthread.save
           end
+          #if at target_mrl, set subthreads in_assessment to true
+          # if count == p[:target_mrl]
+          #   subthread.update(in_assessment: true) if count == p[:target_mrl)]
+          #   subthread.save
+          #   binding.pry
+          # end
+          
         end
     end
+    #marking correct subthreads as in_assessment
+    target_ths = created_assessment.mr_threads.where(mr_level: created_assessment.target_mrl)
+    target_ths.each do |th|
+      th.subthreads.each do |sub|
+        sub.update(:in_assessment => true)
+        sub.save
+      end
+    end
+
     # return created_assessment
     @all_questions = set_questions(created_assessment)
     puts @all_questions
