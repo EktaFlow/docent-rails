@@ -144,6 +144,14 @@ module AssessmentsHelper
 
   end
 
+  def remove_team_member(team_member, assesment)
+    user = User.find_by(email: team_member[:email])
+    if user && assessment
+      #delete from assessment.team_members
+      #delete from user.team_members
+    end
+  end
+
   def delete_all_attachments(assessment)
     assessment.file_attachments.each do |fa|
       fa.destroy

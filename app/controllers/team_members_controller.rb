@@ -18,4 +18,22 @@ class TeamMembersController < ApplicationController
       render json: {team_member: @u.email, assessment: @assessment.get_info_for_dashboard('owned'), newUser: true}
     end
   end
+
+  def destroy 
+    @assessment = Assessment.find(params[:assessment_id])
+    # @user = User.find_by(email: params[:email])
+
+    if @user && @assessment
+      @tm = TeamMember.find_by(user_id: @user.id, assessment_id: @assessment.id, role: params[:role])
+      @tm.destroy
+      render json: {success: true}
+    else 
+      render json: {sucess: false}
+    end
+  end
+
+  # def destroy
+  #   @user = User.find_by(email: params[:user][:email])
+  #   @tm = TeamMember.find_by(user_id: @user.id)
+  # end
 end

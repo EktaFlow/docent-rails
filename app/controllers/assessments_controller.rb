@@ -45,7 +45,7 @@ class AssessmentsController < ApplicationController
     # binding.pry
     @assessment.owner = current_user
     @assessment.current_mrl = params[:target_mrl]
-    if params[:assessment][:level_switching] == nil
+    if params[:assessment][:level_switching] == nil || params[:assessment][:level_switching].downcase == 'no'
       @assessment.level_switching = false
     end
     if @assessment.save
@@ -129,6 +129,7 @@ class AssessmentsController < ApplicationController
       @user = User.find_by(id: tm.user_id)
       if @user 
         @tm_info = {
+          user_id: @user.id,
           email: @user.email, 
           role: tm.role
         }
@@ -137,6 +138,20 @@ class AssessmentsController < ApplicationController
     end
 
     render json: {team_members: @tms_info}
+  end
+
+  def delete_tm
+    @assessment = Assessment.find(params[:data][:assessment_id])
+    @user = User.find_by(email: params[:data][:email])
+
+    if @assessment && @user 
+      @tm = TeamMember.where(user_id: @user.id, assessment_id: @assessment.id)[0]
+      @tm.delete
+      render json: {success: true}
+    else 
+      render json: {sucess: false}
+    end
+
   end
 
 

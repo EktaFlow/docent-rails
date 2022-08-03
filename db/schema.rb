@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_07_29_170351) do
+ActiveRecord::Schema.define(version: 2022_08_03_200442) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -135,7 +135,7 @@ ActiveRecord::Schema.define(version: 2022_07_29_170351) do
     t.boolean "in_assessment"
   end
 
-  create_table "team_members", id: false, force: :cascade do |t|
+  create_table "team_members", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "assessment_id", null: false
     t.string "role"

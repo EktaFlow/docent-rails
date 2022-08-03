@@ -97,7 +97,8 @@ class Assessment < ApplicationRecord
     @all_qs = self.grab_length(self.target_mrl)
     @question = @all_qs.find {|q| q.answered == nil || q.answered == false}
     subth = self.get_correct_subthread(@question.subthread)
-    return subth.questions.first
+    # return subth.questions.first
+    return @question
   end
 
   def get_files_for_explorer
@@ -180,7 +181,9 @@ class Assessment < ApplicationRecord
       #NEED TO FILTER THIS
     @as = []
     ordered_threads = @threads.sort_by {|obj| obj.name.downcase}
-    @threads.each do |th|
+    # binding.pry
+    # self.mr_threads = ordered_threads
+    ordered_threads.each do |th|
       thread = {
         id: th.id,
         name: th.name,
@@ -188,6 +191,7 @@ class Assessment < ApplicationRecord
         subthreads: []
       }
       ordered_subthreads = th.subthreads.sort_by {|obj| obj.name.downcase}
+      th.subthreads = ordered_subthreads
       ordered_subthreads.each do |sth|
         subthread = {
           id: sth.id,
@@ -196,6 +200,7 @@ class Assessment < ApplicationRecord
           questions: []
         }
         ordered_questions = sth.questions.sort_by{|obj| obj.id}
+        sth.questions = ordered_questions
         ordered_questions.each do |q|
           question = {
             id: q.id,
@@ -211,105 +216,107 @@ class Assessment < ApplicationRecord
     return @as
   end
 
-  def switch_level(cq, movement)
-    #if target mrl == 4 and we've dropped down 1 level (failed for the first time)
-    #finding the right question to switch to
-    thread_start = cq.subthread.mr_thread.name[0]
-    #thread_start could equal 'A' || 'B' || 'C'
-    #the current_mrl is updated to the new number (this would equal mrl 3)
-    ths = MrThread.where(mr_level: self.current_mrl)
-    #[<MrThread mrl: 3 name: 'A: Technology ..'>, <MrThread mrl: 3, name: 'B: Design'>, <MrThread mrl: 3, name: 'C: ...'>,  ...]
-    #this is grabbing the correct thread out of those
-    #this sorts through that list and matches the starting letter from the name
-    #string in rails, you can get any character
-    #str = 'Docent' ... str[0] == 'D' ; str[3] == 'e'
+  # def switch_level(cq, movement)
+  #   #if target mrl == 4 and we've dropped down 1 level (failed for the first time)
+  #   #finding the right question to switch to
+  #   thread_start = cq.subthread.mr_thread.name[0]
+  #   #thread_start could equal 'A' || 'B' || 'C'
+  #   #the current_mrl is updated to the new number (this would equal mrl 3)
+  #   ths = MrThread.where(mr_level: self.current_mrl)
+  #   #[<MrThread mrl: 3 name: 'A: Technology ..'>, <MrThread mrl: 3, name: 'B: Design'>, <MrThread mrl: 3, name: 'C: ...'>,  ...]
+  #   #this is grabbing the correct thread out of those
+  #   #this sorts through that list and matches the starting letter from the name
+  #   #string in rails, you can get any character
+  #   #str = 'Docent' ... str[0] == 'D' ; str[3] == 'e'
 
-    th = ths.select {|th| th.name[0] == thread_start}[0]
-    #this should give us the correct dropped thread
-    # binding.pry
-    if movement == 'forward'
-        #either this finds the next dropped subthread for us OR if we have passed the subthread (based on the subthread status + whatever the current_mrl is set to (which we do before we enter this function))
-        # self.update(dropped_subthread_id: sth.id)
-        #subthread.name == 'A.1'
-        # binding.pry
-        if self.current_mrl != self.target_mrl
-          subthread_start = cq.subthread.name[0..2]
-          #from the new thread, we look through all the subthreads and find the first question out of the correct subthread
-          subs = th.subthreads.select { |sth| sth.questions.length > 0 }
-          #subs == [<Subthread name: 'A.1: Technology ..'>, <Subthread name: 'A.2: Design'>]
-          sth = subs.select {|st| st.name[0..2] == subthread_start}[0]
-          if sth
-            # binding.pry
-            #if we have found the right subthread in the right thread (after dropping down a level), return the first question of that subthread
-            return sth.questions[0]
-          end
-        else
-          #if target mrl && current mrl match, means we are BACK in the right MRL and we need to navigate to the next subthread
-          index_of_thread = ths.find_index(th)
-          subthread_start = cq.subthread.name[0..2]
-          #if we fail A.1 level 4, then PASS A.1 level 3 -- we should just move to A.2 level 4
-          #later on, if we fail B.2 level 4, pass B.2 level 3 -- we will need to move to C.1 level 4
-          subs = th.subthreads.select { |sth| sth.questions.length > 0 }
-          sth = subs.select {|st| st.name[0..2] == subthread_start}[0]
-          #if our subthread is the LAST in the thread
-          if subs.find_index(sth) == subs.length - 1
-            #jump to next thread A.2 --> B.1
-            new_thread = ths[index_of_thread + 1]
-            #this will make sure we don't have any empty subthreads (precaution)
-            new_thread_subthreads = new_thread.subthreads..select { |sth| sth.questions.length > 0 }
-            #then grab first question from first subthread
-            return new_thread_subthreads[0].questions[0]
-          else
-            #if its not the last subthread in the thread
-            #A.1 --> A.2
-            subthread_index = subs.find_index(sth)
-            next_subthread = subs[subthread_index + 1]
-            return next_subthread.questions[0]
-          end
-        end
-    elsif movement == 'backwards'
-      # binding.pry
-      #is the current subthread you're in, the first one of the dropped MrThread
-      #MrThread A level 3 :: A.1, A.2
-      subthread_start = cq.subthread.name[0..2]
-      subs = th.subthreads.select { |sth| sth.questions.length > 0 }
-      sth = subs.select {|st| st.name[0..2] == subthread_start}[0]
-      if th.subthreads.first != sth
-        #this needs the same build out if we're switching threads (and not just subthreads, because right now we're not even checking for that)
-        #finds the index of the current dropped MrThread
-        #most likely the issue spot? i can't remember what this is exactly supposed to do
-        subthread_index = subs.find_index(sth)
-        prev_subthread = subs[subthread_index - 1]
-        return prev_subthread.questions[0]
-        # index = ths.find_index(th)
-        # if index != 0
-        #   @new_th = ths[index - 1]
-        #   # binding.pry
-        #   subs = @new_th.subthreads.select { |sth| sth.questions.length > 0 }
-        #   return subs.last.questions.last
-        # end
-      else
-        #if the subthread is the first one
-        #we'll need to drop down to the next subthread
-        index_of_thread = ths.find_index(th)
-        new_thread = ths[index_of_thread - 1]
-        new_thread_subthreads = new_thread.subthreads..select { |sth| sth.questions.length > 0 }
-        #then grab last question from last subthread of the new thread
-        return new_thread_subthreads.last.questions.last
-      end
-    end
-  end
+  #   th = ths.select {|th| th.name[0] == thread_start}[0]
+  #   #this should give us the correct dropped thread
+  #   # binding.pry
+  #   if movement == 'forward'
+  #       #either this finds the next dropped subthread for us OR if we have passed the subthread (based on the subthread status + whatever the current_mrl is set to (which we do before we enter this function))
+  #       # self.update(dropped_subthread_id: sth.id)
+  #       #subthread.name == 'A.1'
+  #       # binding.pry
+  #       if self.current_mrl != self.target_mrl
+  #         subthread_start = cq.subthread.name[0..2]
+  #         #from the new thread, we look through all the subthreads and find the first question out of the correct subthread
+  #         subs = th.subthreads.select { |sth| sth.questions.length > 0 }
+  #         #subs == [<Subthread name: 'A.1: Technology ..'>, <Subthread name: 'A.2: Design'>]
+  #         sth = subs.select {|st| st.name[0..2] == subthread_start}[0]
+  #         if sth
+  #           # binding.pry
+  #           #if we have found the right subthread in the right thread (after dropping down a level), return the first question of that subthread
+  #           return sth.questions[0]
+  #         end
+  #       else
+  #         #if target mrl && current mrl match, means we are BACK in the right MRL and we need to navigate to the next subthread
+  #         index_of_thread = ths.find_index(th)
+  #         subthread_start = cq.subthread.name[0..2]
+  #         #if we fail A.1 level 4, then PASS A.1 level 3 -- we should just move to A.2 level 4
+  #         #later on, if we fail B.2 level 4, pass B.2 level 3 -- we will need to move to C.1 level 4
+  #         subs = th.subthreads.select { |sth| sth.questions.length > 0 }
+  #         sth = subs.select {|st| st.name[0..2] == subthread_start}[0]
+  #         #if our subthread is the LAST in the thread
+  #         if subs.find_index(sth) == subs.length - 1
+  #           #jump to next thread A.2 --> B.1
+  #           new_thread = ths[index_of_thread + 1]
+  #           #this will make sure we don't have any empty subthreads (precaution)
+  #           new_thread_subthreads = new_thread.subthreads..select { |sth| sth.questions.length > 0 }
+  #           #then grab first question from first subthread
+  #           return new_thread_subthreads[0].questions[0]
+  #         else
+  #           #if its not the last subthread in the thread
+  #           #A.1 --> A.2
+  #           subthread_index = subs.find_index(sth)
+  #           next_subthread = subs[subthread_index + 1]
+  #           return next_subthread.questions[0]
+  #         end
+  #       end
+  #   elsif movement == 'backwards'
+  #     # binding.pry
+  #     #is the current subthread you're in, the first one of the dropped MrThread
+  #     #MrThread A level 3 :: A.1, A.2
+  #     subthread_start = cq.subthread.name[0..2]
+  #     subs = th.subthreads.select { |sth| sth.questions.length > 0 }
+  #     sth = subs.select {|st| st.name[0..2] == subthread_start}[0]
+  #     if th.subthreads.first != sth
+  #       #this needs the same build out if we're switching threads (and not just subthreads, because right now we're not even checking for that)
+  #       #finds the index of the current dropped MrThread
+  #       #most likely the issue spot? i can't remember what this is exactly supposed to do
+  #       subthread_index = subs.find_index(sth)
+  #       prev_subthread = subs[subthread_index - 1]
+  #       return prev_subthread.questions[0]
+  #       # index = ths.find_index(th)
+  #       # if index != 0
+  #       #   @new_th = ths[index - 1]
+  #       #   # binding.pry
+  #       #   subs = @new_th.subthreads.select { |sth| sth.questions.length > 0 }
+  #       #   return subs.last.questions.last
+  #       # end
+  #     else
+  #       #if the subthread is the first one
+  #       #we'll need to drop down to the next subthread
+  #       index_of_thread = ths.find_index(th)
+  #       new_thread = ths[index_of_thread - 1]
+  #       new_thread_subthreads = new_thread.subthreads..select { |sth| sth.questions.length > 0 }
+  #       #then grab last question from last subthread of the new thread
+  #       return new_thread_subthreads.last.questions.last
+  #     end
+  #   end
+  # end
 
   #returns subthread at correct mrl when level switching (when navigating or when assessment loads in)
     #pass in subthread name (A.1) and thread at current mrl to get ones lower
   #WHERE DO I CALL THIS FUNCTION???
   def get_correct_subthread(subthread)
     new_th = subthread.mr_thread
+    # binding.pry
     #start at subthread at target_mrl = current_sub
     current_sub = new_th.subthreads.where(name: subthread.name)[0]
     #find sub_below
     th_below = self.mr_threads.where(name: new_th.name, mr_level: (new_th.mr_level - 1))[0]
-    sub_below = th_below.subthreads.where(name: current_sub.name)[0]
+    # binding.pry
+    sub_below = th_below.subthreads.where(name: subthread.name)[0]
 
     #if current_sub is passed and in_assessment --> return this one
     if (current_sub.in_assessment && current_sub.status == 'passed') || (sub_below.in_assessment && sub_below.status == 'passed')
@@ -378,6 +385,7 @@ class Assessment < ApplicationRecord
       #if current subthread/thread at target_mrl, navigate to next subthread at normal MRL
       if curr_thread.mr_level == self.target_mrl 
         #get index of current thread in target mrl
+        # binding.pry
         index_of_thread = threads_in_target_mrl.find_index(curr_thread)
         # curr_sub_name = current_subthread.name[0..2] #A.1
 
@@ -526,9 +534,10 @@ class Assessment < ApplicationRecord
   #make sure test assessments have current_mrl filled in
   def grab_length(mrl)
     # cmrl = self.current_mrl
-    @th = self.mr_threads.select {|thread| thread.mr_level == mrl}
+    @th = self.mr_threads.select {|thread| thread.mr_level == mrl} 
     questions = []
     @th.each do |thread|
+      # binding.pry
       ordered_subthreads = thread.subthreads.sort_by {|obj| obj.name.downcase}
       ordered_subthreads.each do |sth|
         sth.questions.each do |q|

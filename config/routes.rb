@@ -25,6 +25,7 @@ Rails.application.routes.draw do
 
   put '/update_assessments', to: 'assessments#update'
   get '/get_all_tm', to: 'assessments#get_all_tm'
+  delete '/delete_tm', to: 'assessments#delete_tm'
 
   devise_for :users,
              controllers: {
