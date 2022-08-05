@@ -20,7 +20,7 @@ class Question < ApplicationRecord
     # binding.pry
     @length_of_asm = @assessment.grab_length(@assessment.current_mrl)
     @position = @length_of_asm.find_index(self)
-    @pis = self.subthread.questions.find_index(self)
+    @pis = self.subthread.questions.sort_by{|obj| obj.id}.find_index(self)
     # if level switching off, find position like how it has been doing it
     # if level switching on, return position in subthread 
     # binding.pry

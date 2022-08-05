@@ -26,7 +26,9 @@ module AssessmentsHelper
       puts current_row
       if current_row[0] != nil 
         # binding.pry
-        next if p[:threads].exclude? current_row[0][0]
+        if p.has_key?(:threads)
+          next if p[:threads].exclude? current_row[0][0]
+        end
       end
       
       # if current_row[0] 
@@ -102,7 +104,7 @@ module AssessmentsHelper
 
     # return created_assessment
     @all_questions = set_questions(created_assessment)
-    puts @all_questions
+    # binding.pry
     return @all_questions
   end
 
@@ -123,7 +125,9 @@ module AssessmentsHelper
       th.subthreads.each do |sth|
         matching = q_aire.select {|item| item["Sub"] != nil && item["Sub"][0..2] == sth.name[0..2] && item["MRL"] == th.mr_level }
         matching.each do |q|
-          @question = Question.create(question_text: q["Question"], subthread: sth)
+          # @question = Question.create(question_text: q["Question"], subthread: sth)
+          @question = Question.create(question_text: q["Question"])
+          sth.questions << @question
         end
       end
     end

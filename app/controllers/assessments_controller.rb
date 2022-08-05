@@ -55,6 +55,8 @@ class AssessmentsController < ApplicationController
         helpers.add_team_members(params[:team_members], @assessment)
         # @assessment.add_team_members(params[:team_members])
       end
+      @assessment.mr_threads.sort_by{|th| th.name[0].downcase}
+      # binding.pry
       render json: {assessment_id: @assessment.id}
     else
       render json: {errors: @assessment.errors}, status: :unprocessable_entity
@@ -65,16 +67,14 @@ class AssessmentsController < ApplicationController
     @assessment = Assessment.find(params[:id])
     # binding.pry
     # @assessment.update(name: params[:assess_name])
+    if params[:team_members] 
+      helpers.add_team_members(params[:team_members], @assessment)
+    end
     @assessment.update(assessment_params)
+    @assessment.update(current_mrl: params[:target_mrl])
+    # helpers.get_schema(@assessment, @assessment.id, params)
+    @assessment.save
 
-    # binding.pry
-    #trying to update all params that are not null (for edit assessment)
-    # assessment_params.each do |key, value|
-    #   if params["#{key}"] != nil && params["#{key}"] != ''
-    #     @assessment.update("#{key}" => params["#{key}"])
-    #   end
-    # end
-    # @assessment.update_attributes(params)
     render json: {assessment: @assessment}
   end
 
