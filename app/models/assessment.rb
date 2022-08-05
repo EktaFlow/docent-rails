@@ -131,8 +131,6 @@ class Assessment < ApplicationRecord
 
   #returns all threads, not just ones at current_mrl --> used for filtering on frontend
   def get_all_threads
-    # @all_threads = Hash.new #5 => {threads}
-    #get threads of assessment at each mrl
     @all_threads = []
     #only need threads up to target_mrl because will not go beyond that
     (1..self.target_mrl).each do |mrl|
@@ -166,8 +164,6 @@ class Assessment < ApplicationRecord
           end
           thread[:subthreads] << subthread
         end
-        # @all_threads << thread #ADD @ths TO @all_threads AT MRL FOR HASH
-        # @all_threads[mrl] << thread
         @all_threads << thread
       end
     end
@@ -178,17 +174,12 @@ class Assessment < ApplicationRecord
   def report_grouping
     #show all threads, not just one at current_mrl - filter on frontend?
     @threads = self.mr_threads.select {|th| th.mr_level == self.current_mrl}
-    #send back all threads so users can filter as they want on frontend
-    # @threads = self.mr_threads
-      #NEED TO FILTER THIS
     @as = []
     ordered_threads = @threads.sort_by {|obj| obj.name[0].downcase}
     # binding.pry
     if self.level_switching == false
       self.mr_threads = ordered_threads
     end
-    # binding.pry
-    # self.mr_threads = ordered_threads
     ordered_threads.each do |th|
       thread = {
         id: th.id,
@@ -224,8 +215,6 @@ class Assessment < ApplicationRecord
   end
 
   #returns subthread at correct mrl when level switching (when navigating or when assessment loads in)
-    #pass in subthread name (A.1) and thread at current mrl to get ones lower
-  #WHERE DO I CALL THIS FUNCTION???
   def get_correct_subthread(subthread)
     new_th = subthread.mr_thread
     # binding.pry
@@ -292,7 +281,8 @@ class Assessment < ApplicationRecord
     if movement == 'forward' && current_subthread.status == 'failed'
       #ADD CONDITION IF GETS TO MRL 1, CAN'T GO DOWN ANYMORE
       if curr_thread.mr_level == 1
-        return current_subthread
+        # return current_subthread
+        return {new_subthread: current_subthread, new_question: current_subthread.questions.sort_by{|q| q.id}.first, level_change: 'none' }
       end
       #get subthread that failed --> get thread
       new_mrl = curr_thread.mr_level - 1
@@ -304,7 +294,8 @@ class Assessment < ApplicationRecord
       new_subth.update(in_assessment: true)
 
       #swap in new subthread for old subthread
-      return new_subth
+      # return new_subth
+      return {new_subthread: new_subth, new_question: new_subth.questions.sort_by{|q| q.id}.first, level_change: 'down' }
     
     #if movement forward and passed
     elsif movement == 'forward' && current_subthread.status == 'passed'
@@ -333,10 +324,9 @@ class Assessment < ApplicationRecord
           #get next subthread at index + 1
           new_subth = ordered_subs_in_thread[sub_index + 1]
         end
-
-        #return first question in new_subthread
         new_subth.update(in_assessment: true)
-        return {new_subthread: new_subth, level_change: 'none'}
+        #return first question in new_subthread
+        return {new_subthread: new_subth, new_question: new_subth.questions.sort_by{|q| q.id}.first, level_change: 'none' }
 
       #if current thread mrl does not equal target mrl and passed
       else 
@@ -348,7 +338,7 @@ class Assessment < ApplicationRecord
         #get new subthread
         new_subth = new_thread.subthreads.find_by(name: current_subthread.name)
         new_subth.update(in_assessment: true)
-        return {new_subthread: new_subth, level_change: 'up'}
+        return {new_subthread: new_subth, new_question: new_subth.questions.sort_by{|q| q.id}.first, level_change: 'up'}
         
       end
     
@@ -381,7 +371,8 @@ class Assessment < ApplicationRecord
         new_subth = get_correct_subthread(ordered_subs_in_thread[sub_index + 1])
         # binding.pry
       end
-      return new_subth
+      # return new_subth
+      return {new_subthread: new_subth, new_question: new_subth.questions.sort_by{|q| q.id}.first, level_change: 'none' }
 
     #if going backwards, switch back to target_mrl and go to previous subthread 
     elsif movement == 'backwards'
@@ -393,8 +384,6 @@ class Assessment < ApplicationRecord
       # subs_in_thread = th_in_target_mrl.subthreads.select {|sub| sub.questions.length > 0}
       ordered_subs_in_thread = th_in_target_mrl.subthreads.sort_by {|obj| obj.name.downcase}
       sth = ordered_subs_in_thread.select { |st| st.name[0..2] == curr_sub_name}[0]
-      # sub_index = subs_in_thread.find_index(current_subthread)
-      # binding.pry
       
       #if sth is not the first subthread in the current thread in target mrl, stay in current thread
       if ordered_subs_in_thread[0] != sth 
@@ -402,9 +391,6 @@ class Assessment < ApplicationRecord
         sub_index = ordered_subs_in_thread.find_index(sth)
         prev_subthread = get_correct_subthread(ordered_subs_in_thread[sub_index - 1])
         #return last question in previous subthread
-        return prev_subthread.questions.sort_by{|obj| obj.id}.last
-        # return prev_subthread.questions.last
-      #if subthread is first in thread, get last subthread in previous thread
       else 
         #get index of current thread in target mrl
         index_of_thread = threads_in_target_mrl.find_index(th_in_target_mrl)
@@ -415,9 +401,8 @@ class Assessment < ApplicationRecord
         prev_subthread = get_correct_subthread(prev_thread_subs_ordered.last)
         #return last question in last subthread of previous thread
         # binding.pry
-        #SORT QUESTIONS
-        return prev_subthread.questions.sort_by{|obj| obj.id}.last
       end
+      return {new_subthread: prev_subthread, new_question: prev_subthread.questions.sort_by{|q| q.id}.last, level_change: 'none' }
 
     end
 
@@ -446,12 +431,9 @@ class Assessment < ApplicationRecord
             end
           end
         end
-
       end
-      
     end
-
-
+    
     #return array
     return all_questions
   end
