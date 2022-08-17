@@ -26,7 +26,7 @@ class AssessmentsController < ApplicationController
   #     assessment = Assessment.find_by(id: t.assessment.id)
   #     assessments_with_info << assessment.get_info_for_dashboard('shared')
   #   end
-    
+
     render json: {assessments: assessments_with_info}
   end
 
@@ -63,7 +63,7 @@ class AssessmentsController < ApplicationController
     end
   end
 
-  def update 
+  def update
     @assessment = Assessment.find(params[:id])
     # binding.pry
     # @assessment.update(name: params[:assess_name])
@@ -127,10 +127,11 @@ class AssessmentsController < ApplicationController
     @tms_info = []
     @assessment.team_members.each do |tm|
       @user = User.find_by(id: tm.user_id)
-      if @user 
+      if @user
         @tm_info = {
           user_id: @user.id,
           email: @user.email, 
+
           role: tm.role
         }
         @tms_info << @tm_info
