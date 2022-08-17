@@ -17,17 +17,23 @@ class Question < ApplicationRecord
 
     #current thread / all threads
     @assessment = self.subthread.mr_thread.assessment
-    @length_of_asm = @assessment.grab_length
+    # binding.pry
+    @length_of_asm = @assessment.grab_length(@assessment.current_mrl)
     @position = @length_of_asm.find_index(self)
+    @pis = self.subthread.questions.sort_by{|obj| obj.id}.find_index(self)
+    # if level switching off, find position like how it has been doing it
+    # if level switching on, return position in subthread 
+    # binding.pry
     q = {
       question_id: self.id,
       question_text: self.question_text,
       current_answer_text: self.current_answer,
       answered: self.answered == nil ? false : true,
-      position: @position + 1,
+      position: @position ? @position + 1 : 0,
+      pos_in_sub: @pis + 1,
       assessment_length: @length_of_asm.length,
       current_answer: self.answers.empty? ? [] : self.answers.last,
-      all_answers: self.answers.empty? ? [] : self.answers.select{|a| a.answer != nil}.reverse(),
+      all_answers: self.answers.empty? ? [] : self.answers.select{|a| a.answer != nil}.reverse,
       # new_answer: Answer.create, 
       structure: @assessment.list_of_threads,
       current_mrl: self.subthread.mr_thread.mr_level,
@@ -53,8 +59,7 @@ class Question < ApplicationRecord
   end
 
   def all_info(lc)
-    # binding.pry
     @assessment = self.subthread.mr_thread.assessment
-    return {question: self.get_info, subthread: self.subthread, thread: self.subthread.mr_thread, assessment_id: @assessment.id, assessment_info: {targetDate: @assessment.target, additionalInfo: @assessment.scope}, level_change: lc }
+    return {question: self.get_info, subthread: self.subthread.get_sub_info, thread: self.subthread.mr_thread, assessment_id: @assessment.id, assessment_info: {targetDate: @assessment.target, additionalInfo: @assessment.scope, levelSwitching: @assessment.level_switching}, level_change: lc }
   end
 end

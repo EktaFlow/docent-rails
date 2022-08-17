@@ -22,17 +22,25 @@ class AnswersController < ApplicationController
     @question.answers << @answer
     @question.update(current_answer: @answer.answer)
     @question.update(answered: true)
+    # if @answer.answer == 'no'
+    #   @question.subthread.update(status: 'failed')
+    # else
+    #   @question.subthread.update(status: 'passed')
+    # end
     if @question == @question.subthread.questions.last
+      
       #use this status to update UI ?
-      failed = false
+      @failed = false
       @question.subthread.questions.each do |q|
-        if q.answers.length > 0 && q.answers.last.answer == 'no'
+        if q.answers.length > 0 && q.answers.last.answer.downcase == 'no'
           #should exit the for each loop once we have hit a failed question
-          failed = true
+          @failed = true
+        # else
+        #   @failed = false
         end
       end
       #pass true or false based on if there is a failed answer in one of the questions
-      @question.subthread.update(status: failed == true ? 'failed' : 'passed')
+      @question.subthread.update(status: @failed ? 'failed' : 'passed')
     end
     if @answer.save
       render json: {answer: @answer}

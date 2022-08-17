@@ -16,9 +16,9 @@ module AssessmentsHelper
     end
 
     letters = ['C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
-
+    th_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
     last_thread = nil
-
+    
     # guide.last_row
     (4..guide.length - 1).each do |i_count|
       #all rows past header rows, cycle through
@@ -27,6 +27,14 @@ module AssessmentsHelper
         next if p[:threads].exclude? current_row[0][0]
       end
       puts current_row
+      if current_row[0] != nil 
+        # binding.pry
+        if p.has_key?(:threads)
+          next if p[:threads].exclude? current_row[0][0]
+        end
+      end
+      
+      # if current_row[0] 
       # binding.pry
         #need to create 10 thread objects for each level of this thread
         (1..10).each do |count|
@@ -52,6 +60,7 @@ module AssessmentsHelper
 
               subthread.criteria_text = ref_row[2]
             end
+            # subthread.in_assessment = true if count == p[:target_mrl]
             subthread.save
           else
             #need to create 10 thread objects for each level of this thread
@@ -75,13 +84,30 @@ module AssessmentsHelper
               subthread.help_text = ref_row[3]
               subthread.criteria_text = ref_row[2]
             end
+            # subthread.in_assessment = true if count == p[:target_mrl]
             subthread.save
           end
+          #if at target_mrl, set subthreads in_assessment to true
+          # if count == p[:target_mrl]
+          #   subthread.update(in_assessment: true) if count == p[:target_mrl)]
+          #   subthread.save
+          #   binding.pry
+          # end
+          
         end
     end
+    #marking correct subthreads as in_assessment
+    target_ths = created_assessment.mr_threads.where(mr_level: created_assessment.target_mrl)
+    target_ths.each do |th|
+      th.subthreads.each do |sub|
+        sub.update(:in_assessment => true)
+        sub.save
+      end
+    end
+
     # return created_assessment
     @all_questions = set_questions(created_assessment)
-    puts @all_questions
+    # binding.pry
     return @all_questions
   end
 
@@ -102,7 +128,9 @@ module AssessmentsHelper
       th.subthreads.each do |sth|
         matching = q_aire.select {|item| item["Sub"] != nil && item["Sub"][0..2] == sth.name[0..2] && item["MRL"] == th.mr_level }
         matching.each do |q|
-          @question = Question.create(question_text: q["Question"], subthread: sth)
+          # @question = Question.create(question_text: q["Question"], subthread: sth)
+          @question = Question.create(question_text: q["Question"])
+          sth.questions << @question
         end
       end
     end
@@ -121,6 +149,14 @@ module AssessmentsHelper
       end
     end
 
+  end
+
+  def remove_team_member(team_member, assesment)
+    user = User.find_by(email: team_member[:email])
+    if user && assessment
+      #delete from assessment.team_members
+      #delete from user.team_members
+    end
   end
 
   def delete_all_attachments(assessment)
