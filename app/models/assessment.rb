@@ -433,7 +433,10 @@ class Assessment < ApplicationRecord
     #get questions from each of those subthreads and add to array
     all_questions = []
     #count down from target_mrl
-    (self.target_mrl).downto(1) do |mrl|
+    puts self.target_mrl
+    self.target_mrl == nil ? self.update(target_mrl: self.current_mrl) : nil
+
+    (self.target_mrl == nil ? self.current_mrl : self.target_mrl).downto(1) do |mrl|
       if mrl == self.target_mrl
         all_questions = self.grab_length(self.target_mrl)
 
