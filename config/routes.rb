@@ -33,6 +33,7 @@ Rails.application.routes.draw do
                  registrations: 'users/registrations'
              }
 
+  root to: 'assessments#index'
 
   # get '/browse', to: 'projects#browse'
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
