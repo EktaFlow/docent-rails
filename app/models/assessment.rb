@@ -68,6 +68,16 @@ class Assessment < ApplicationRecord
 
   end
 
+  def get_team_members
+    @team_members = []
+    self.team_members.each do |tm|
+      #grab team members emails
+      tm_u = User.find(tm.user_id)
+      @team_members << {name: tm_u.name, email: tm_u.email, role: tm.role}
+    end
+    @team_members
+  end
+
   def list_of_threads
     @threads = self.mr_threads.select {|th| th.mr_level == self.current_mrl}
     @as = []
@@ -100,6 +110,9 @@ class Assessment < ApplicationRecord
     @question = @all_qs.find {|q| q.answered == nil || q.answered == false}
     if self.level_switching
       subth = self.get_correct_subthread(@question.subthread)
+    end
+    if @question == nil
+      @question = @all_qs[0]
     end
     # return subth.questions.first
     return @question

@@ -67,7 +67,7 @@ class AssessmentsController < ApplicationController
     @assessment = Assessment.find(params[:id])
     # binding.pry
     # @assessment.update(name: params[:assess_name])
-    if params[:team_members] 
+    if params[:team_members]
       helpers.add_team_members(params[:team_members], @assessment)
     end
     @assessment.update(assessment_params)
@@ -76,6 +76,16 @@ class AssessmentsController < ApplicationController
     @assessment.save
 
     render json: {assessment: @assessment}
+  end
+
+  def fetch_data
+    @assessment = Assessment.find(params[:id])
+    if @assessment
+      render json: {info: @assessment, team_members: @assessment.get_team_members}
+      # render json: {threads: @assessment.report_grouping, info: @assessment, team_members: @assessment.team_members}
+    else
+      render json: {errors: @assessment.errors.full_messages}
+    end
   end
 
   def grab_base_report
@@ -130,7 +140,7 @@ class AssessmentsController < ApplicationController
       if @user
         @tm_info = {
           user_id: @user.id,
-          email: @user.email, 
+          email: @user.email,
 
           role: tm.role
         }
@@ -145,11 +155,11 @@ class AssessmentsController < ApplicationController
     @assessment = Assessment.find(params[:data][:assessment_id])
     @user = User.find_by(email: params[:data][:email])
 
-    if @assessment && @user 
+    if @assessment && @user
       @tm = TeamMember.where(user_id: @user.id, assessment_id: @assessment.id)[0]
       @tm.delete
       render json: {success: true}
-    else 
+    else
       render json: {sucess: false}
     end
 
