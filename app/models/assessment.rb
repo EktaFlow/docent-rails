@@ -101,6 +101,9 @@ class Assessment < ApplicationRecord
     if self.level_switching
       subth = self.get_correct_subthread(@question.subthread)
     end
+    if @question == nil
+      @question = @all_qs[0]
+    end
     # return subth.questions.first
     return @question
   end

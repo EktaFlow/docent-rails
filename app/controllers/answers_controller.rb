@@ -28,7 +28,7 @@ class AnswersController < ApplicationController
     #   @question.subthread.update(status: 'passed')
     # end
     if @question == @question.subthread.questions.last
-      
+
       #use this status to update UI ?
       @failed = false
       @question.subthread.questions.each do |q|
